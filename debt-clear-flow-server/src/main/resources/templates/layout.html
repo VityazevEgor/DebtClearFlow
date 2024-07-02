@@ -10,8 +10,8 @@
 
 <body>
     <div class="container">
-        <nav class="navbar navbar-expand-lg navbar-light bg-light rounded" th:fragment="header">
-            <a class="navbar-brand" href="#">Navbar</a>
+        <nav class="navbar navbar-expand-lg navbar-light bg-light rounded" th:fragment="header" style="margin-bottom: 10px;">
+            <a class="navbar-brand" href="#">DebtClearFlow</a>
             <button class="navbar-toggler collapsed" type="button" data-toggle="collapse" data-target="#navbarsExample09" aria-controls="navbarsExample09" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -19,10 +19,10 @@
             <div class="navbar-collapse collapse" id="navbarsExample09">
                 <ul class="navbar-nav mr-auto">
                     <li class="nav-item active">
-                        <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+                        <a class="nav-link" href="#">Мои отработки</span></a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Link</a>
+                        <a class="nav-link" href="#">Создать отработку</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link disabled" href="#">Disabled</a>
@@ -36,9 +36,9 @@
                         </div>
                     </li>
                 </ul>
-                <form class="form-inline my-2 my-md-0">
-                    <input class="form-control" type="text" placeholder="Search" aria-label="Search">
-                </form>
+                <a class="btn-primary btn" th:if="${session == null or session.login == null}" th:href="@{~/login}">Войти</a>
+                <a class="btn-secondary btn" th:if="${session != null and session.login != null}" th:href="@{~/logout}">Выйти</a>
+                <!-- <p th:if="${session != null and session.login != null}" th:text="${session.login}"></p> -->
             </div>
         </nav>
 

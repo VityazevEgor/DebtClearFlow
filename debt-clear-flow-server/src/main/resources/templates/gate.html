@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>DebtClearFlow</title>
+    <!-- Подключение Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" th:href="@{~/custom.css}">
+</head>
+<body>
+    <div class="container">
+        <div th:replace="~{layout :: header}"></div>
+
+        <div class="jumbotron">
+            <h1>DebtClearFlow</h1>
+            <p class="lead">Система автоматизации организации очередей на отработки учебных задолжностей и экзаменов </p>
+            <a class="btn btn-lg btn-primary" th:href="@{~/login}" role="button" th:if="${session == null or session.login == null}">Перейти к авторизации для преподавателей »</a>
+            <a class="btn btn-lg btn-primary" th:href="@{~/panel/}" role="button" th:if="${session != null and session.login != null}">Перейти к панели для преподавателей »</a>
+        </div>
+    </div>
+
+    <!-- Подключение Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</body>
+</html>
