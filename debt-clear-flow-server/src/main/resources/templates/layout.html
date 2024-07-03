@@ -11,7 +11,7 @@
 <body>
     <div class="container">
         <nav class="navbar navbar-expand-lg navbar-light bg-light rounded" th:fragment="header" style="margin-bottom: 10px;">
-            <a class="navbar-brand" href="#">DebtClearFlow</a>
+            <a class="navbar-brand" th:href="@{~/}">DebtClearFlow</a>
             <button class="navbar-toggler collapsed" type="button" data-toggle="collapse" data-target="#navbarsExample09" aria-controls="navbarsExample09" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -19,10 +19,10 @@
             <div class="navbar-collapse collapse" id="navbarsExample09">
                 <ul class="navbar-nav mr-auto">
                     <li class="nav-item active">
-                        <a class="nav-link" href="#">Мои отработки</span></a>
+                        <a class="nav-link" th:href="@{~/panel/myRepayments}">Мои отработки</span></a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Создать отработку</a>
+                        <a class="nav-link" th:href="@{~/panel/createRepayment}">Создать отработку</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link disabled" href="#">Disabled</a>

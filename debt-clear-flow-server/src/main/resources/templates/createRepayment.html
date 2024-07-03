@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>DebtClearFlow - Создать отработку</title>
+    <!-- Подключение Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" th:href="@{~/custom.css}">
+</head>
+<body>
+    <div class="container">
+        <div th:replace="~{layout :: header}"></div>
+
+         <!-- Форма для заполнения данных модели DebtRepayment -->
+         <form method="post" th:action="@{createRepayment}", enctype="application/x-www-form-urlencoded" th:object="${repayment}">
+            <div class="form-group">
+                <label for="name">Название</label>
+                <input type="text" class="form-control" th:field="*{name}" placeholder="Введите название отработки">
+            </div>
+            <div class="form-group">
+                <label for="closet">Кабинет</label>
+                <input type="text" class="form-control" th:field="*{closet}" placeholder="Введите номер кабинета">
+            </div>
+            <div class="form-group">
+                <label for="starTime">Время начала</label>
+                <input type="datetime-local" class="form-control" th:field="*{starTime}" >
+            </div>
+            <div class="form-group">
+                <label for="endTime">Время окончания</label>
+                <input type="datetime-local" class="form-control" th:field="*{endTime}">
+            </div>
+            <div class="form-group">
+                <label for="teachersLogins">Логины преподавателей</label>
+                <input type="text" class="form-control" name="teachersLogins" placeholder="Введите логины преподавателей, разделенные запятой">
+            </div>
+            <button type="submit" class="btn btn-primary">Создать отработку</button>
+        </form>
+
+    </div>
+
+    <!-- Подключение Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</body>
+</html>

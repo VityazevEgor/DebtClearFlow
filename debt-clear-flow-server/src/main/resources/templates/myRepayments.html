@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>DebtClearFlow - Мои отработки</title>
+    <!-- Подключение Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" th:href="@{~/custom.css}">
+</head>
+<body>
+    <div class="container">
+        <div th:replace="~{layout :: header}"></div>
+
+        <!-- Таблица с данными обо всех отработках -->
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Название</th>
+                    <th scope="col">Кабинет</th>
+                    <th scope="col">Время начала</th>
+                    <th scope="col">Время окончания</th>
+                    <th scope="col">Логины преподавателей</th>
+                    <th scope="col">Открыто</th>
+                    <th scope="col">Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="debtRepayment : ${debtRepayments}">
+                    <td th:text="${debtRepayment.id}"></td>
+                    <td th:text="${debtRepayment.name}"></td>
+                    <td th:text="${debtRepayment.closet}"></td>
+                    <td th:text="${debtRepayment.starTime}"></td>
+                    <td th:text="${debtRepayment.endTime}"></td>
+                    <td th:text="${debtRepayment.teachersLogins}"></td>
+                    <td th:text="${debtRepayment.isOpen}"></td>
+                    <td>
+                        <a th:href="@{'~/panel/view/' + ${debtRepayment.id}}" class="btn btn-primary">Перейти</a>
+                        <a th:href="@{'~/panel/delete/' + ${debtRepayment.id}}" class="btn btn-danger">Удалить</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+    </div>
+
+    <!-- Подключение Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>DebtClearFlow - Просмотр отработки</title>
+    <!-- Подключение Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" th:href="@{~/custom.css}">
+</head>
+<body>
+    <div class="container">
+        <div th:replace="~{layout :: header}"></div>
+
+        <!-- Карточка для добавления новых студентов на отработку -->
+        <div class="card">
+            <div class="card-header">
+                Добавить новых студентов на отработку <span th:text="${repayment.name}"></span>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="file">Выберите CSV файл</label>
+                        <input type="file" class="form-control-file" id="csvFile" name="csvFile">
+                    </div>
+                    <div class="form-group">
+                        <label for="nameColumn">Столбец с именами студентов</label>
+                        <input type="text" class="form-control" id="nameColumn" name="nameColumn">
+                    </div>
+                    <div class="form-group">
+                        <label for="emailColumn">Столбец с почтами студентов</label>
+                        <input type="text" class="form-control" id="emailColumn" name="emailColumn">
+                    </div>
+                    <div class="form-group">
+                        <label for="workDescriptionColumn">Столбец с описанием работы</label>
+                        <input type="text" class="form-control" id="workDescriptionColumn" name="workDescriptionColumn">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Добавить студентов</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Таблица с данными обо всех отработках -->
+        <table class="table table-striped mt-4">
+            <thead>
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Фамилия</th>
+                    <th scope="col">Описание работы</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="student : ${qStudents}">
+                    <td th:text="${student.id}"></td>
+                    <td th:text="${student.fullName}"></td>
+                    <td th:text="${student.workDeskription}"></td>
+                </tr>
+            </tbody>
+        </table>
+
+    </div>
+
+    <!-- Подключение Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</body>
+</html>
