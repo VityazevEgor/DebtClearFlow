@@ -26,6 +26,8 @@ import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.io.*;
 
@@ -105,6 +107,7 @@ public class RepaymentController {
 
 
     // в этом методе буду использовать https://commons.apache.org/proper/commons-csv/user-guide.html
+    // TODO надо будет добавить взятие описание работы по названию столбца. Название столбца будет указыватся в форме
     @RequestMapping(value  =  "/view/{rpid}", method  = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ModelAndView addStudents(@RequestPart MultipartFile csvFile, @PathVariable("rpid") Integer Id){
         if (csvFile.getSize() > 0){
@@ -115,21 +118,27 @@ public class RepaymentController {
                 csvFile.transferTo(file);
                 logger.info("Saved csv file as "+fileName);
 
-                FileReader in = new FileReader(file);
-
-                //                 8
-
-                // Since Apache Commons CSV v1.9.0, the withSkipHeaderRecord() & the withFirstRecordAsHeader() methods are deprecated. A builder interface is provided. Use it thusly:
-
-                // CSVFormat.DEFAULT.builder()
-                //     .setHeader()
-                //     .setSkipHeaderRecord(true)
-                //     .build();
-                Iterable<CSVRecord> records = CSVFormat.DEFAULT.withFirstRecordAsHeader().withTrim().parse(in);
+                FileReader in = new FileReader(file, StandardCharsets.UTF_8);
+                Iterable<CSVRecord> records = CSVFormat.DEFAULT.builder().setHeader().setSkipHeaderRecord(true).setTrim(true).build().parse(in);
                 for (CSVRecord record : records) {
-                    logger.info("Got record:  "  + record.get(1) + ":"+record.get(1));
-                    //record.toList()
-                    // TODO сделать автоматическое определение того где находиться почта, а где имя и фамелия
+                    List<String> columnsData = record.toList();
+                    var qStudent  = new QStudent();
+                    qStudent.setDebtRepaymentId(Id);
+
+                    for (String data : columnsData){
+                        if (Shared.isEmail(data)){
+                            qStudent.setEmail(data);
+                        }
+                        if (Shared.isFullName(data)){
+                            qStudent.setFullName(data);
+                        }
+                    }
+                    if (qStudent.checkEmailAndFullName()){
+                        qStudentRepo.save(qStudent);
+                        logger.info("Saved qStudent!");
+                        System.out.print(qStudent.toString());
+                    }
+
                 }
             } catch (IllegalStateException e) {
                 logger.error("Can't tranfer csv file", e);

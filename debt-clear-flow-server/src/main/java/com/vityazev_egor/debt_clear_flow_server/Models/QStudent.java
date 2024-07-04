@@ -28,6 +28,22 @@ public class QStudent {
     // логин преподователя, который принимает данного студента
     private String teacherLogin;
 
+    public Boolean checkEmailAndFullName(){
+        return fullName != null && email != null;
+    }
+
+    @Override
+    public String toString(){
+        return "id: " + id + "\n" +
+                "fullName: " + fullName + "\n" +
+                "email: " + email + "\n" +
+                "workDeskription: " + workDeskription + "\n" +
+                "debtRepaymentId: " + debtRepaymentId + "\n" +
+                "isAccepted: " + isAccepted + "\n" +
+                "isInProcess: " + isInProcess + "\n" +
+                "teacherLogin: " + teacherLogin + "\n";
+    }
+
     public void setId(Integer id) {
         this.id = id;
     }
