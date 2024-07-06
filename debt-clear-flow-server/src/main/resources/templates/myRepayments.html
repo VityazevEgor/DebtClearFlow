@@ -34,7 +34,8 @@
                     <td th:text="${debtRepayment.teachersLogins}"></td>
                     <td th:text="${debtRepayment.isOpen}"></td>
                     <td>
-                        <a th:href="@{'~/panel/view/' + ${debtRepayment.id}}" class="btn btn-primary">Перейти</a>
+                        <a th:href="@{'~/panel/reception/' + ${debtRepayment.id}}" class="btn btn-outline-success">Начать приём</a>
+                        <a th:href="@{'~/panel/view/' + ${debtRepayment.id}}" class="btn btn-primary">Списки</a>
                         <a th:href="@{'~/panel/delete/' + ${debtRepayment.id}}" class="btn btn-danger">Удалить</a>
                     </td>
                 </tr>

@@ -109,7 +109,7 @@ public class RepaymentController {
     // в этом методе буду использовать https://commons.apache.org/proper/commons-csv/user-guide.html
     // TODO надо будет добавить взятие описание работы по названию столбца. Название столбца будет указыватся в форме
     @RequestMapping(value  =  "/view/{rpid}", method  = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ModelAndView addStudents(@RequestPart MultipartFile csvFile, @PathVariable("rpid") Integer Id){
+    public ModelAndView addStudents(@RequestPart MultipartFile csvFile, @RequestPart String descriptionColumnName, @PathVariable("rpid") Integer Id){
         if (csvFile.getSize() > 0){
             logger.info("Got file! File size = " + csvFile.getSize());
             String fileName = java.util.UUID.randomUUID().toString() + ".csv";
@@ -133,6 +133,11 @@ public class RepaymentController {
                             qStudent.setFullName(data);
                         }
                     }
+                    
+                    if (!descriptionColumnName.isBlank()){
+                        qStudent.setWorkDeskription(record.get(descriptionColumnName));
+                    }
+
                     if (qStudent.checkEmailAndFullName()){
                         qStudentRepo.save(qStudent);
                         logger.info("Saved qStudent!");
@@ -150,6 +155,14 @@ public class RepaymentController {
             logger.error("Can't get file");
         }
         return getViewRepaymentModelById(Id);
+    }
+
+    // очистить список записанных студентов
+    @RequestMapping(value  =  "/clearAll/{rpid}", method  = RequestMethod.GET)
+    public ModelAndView clearAll(@PathVariable("rpid") Integer id){
+        List<QStudent> setudents  = qStudentRepo.findByDebtRepaymentIdOrderByIdAsc(id);
+        qStudentRepo.deleteAll(setudents);
+        return new ModelAndView("redirect:/panel/view/"+id.toString());
     }
 
 }

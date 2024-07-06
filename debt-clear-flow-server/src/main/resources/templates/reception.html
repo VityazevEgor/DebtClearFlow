@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>DebtClearFlow - Приём студентов</title>
+    <!-- Подключение Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" th:href="@{~/custom.css}">
+</head>
+<body>
+    <div class="container">
+        <div th:replace="~{layout :: header}"></div>
+
+        <!-- Карточка для добавления новых студентов на отработку -->
+        <div class="card">
+            <div class="card-header">
+                Приём студентов на отработку - <span th:text="${repayment.name}"></span>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data" th:if="${currentStudent != null}">
+                    <div class="form-group">
+                        <label for="file">ФИО студента</label>
+                        <input type="text" disabled class="form-control" name="fullName" th:value="${currentStudent.fullName}">
+                    </div>
+                    <div class="form-group">
+                        <label for="workDescriptionColumn">Описание задолжности</label>
+                        <input type="text" class="form-control" name="workDeskription" th:value="${currentStudent.workDeskription}">
+                    </div>
+                </form>
+
+                <div class="alert alert-danger" role="alert" th:if="${currentStudent == null}">
+                    Вы ещё не начали принимать студентов
+                </div>
+                <a class="btn btn-lg btn-primary" th:href="@{'~/panel/reception/' + ${repayment.id} + '/next'}" role="button">Принять следующего студента</a>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Подключение Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</body>
+</html>
