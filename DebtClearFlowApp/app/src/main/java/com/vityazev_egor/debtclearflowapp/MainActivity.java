@@ -31,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
         shared = new Shared(this);
+        shared.clearData();
 
         // поиск кнопок и прочее
         Button button = findViewById(R.id.authbutton);

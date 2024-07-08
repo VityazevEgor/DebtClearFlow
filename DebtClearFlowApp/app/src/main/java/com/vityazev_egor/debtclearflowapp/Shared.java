@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 public class Shared {
     private final Context context;
     private final SharedPreferences sharedPreferences;
+    public final String serverUrl = "http://192.168.1.65:8080/api/";
 
     public Shared(Context context) {
         String APP_NAME = "DebtClearFlow";
