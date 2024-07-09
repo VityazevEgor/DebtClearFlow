@@ -8,6 +8,9 @@ public interface QStudentRepo extends JpaRepository<QStudent, Integer>{
     // ищем студентов, который записаны на определённую очередь
     public List<QStudent> findByDebtRepaymentIdOrderByIdAsc(Integer debtRepaymentId);
 
+    // ищем студентов которые сейчас находятся в очереди
+    public List<QStudent> findByDebtRepaymentIdAndIsAcceptedFalseOrderByIdAsc(Integer debtRepaymentId);
+
     // найти всех студентов с опреедлённой почтой
     public List<QStudent> findByEmail(String email);
 

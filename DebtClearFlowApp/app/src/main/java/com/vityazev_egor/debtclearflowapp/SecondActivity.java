@@ -1,9 +1,11 @@
 package com.vityazev_egor.debtclearflowapp;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.widget.Button;
 import android.widget.ListView;
 
 import androidx.activity.EdgeToEdge;
@@ -13,11 +15,11 @@ import androidx.core.os.HandlerCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import com.vityazev_egor.debtclearflowapp.Models.ReceptionModel;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.vityazev_egor.debtclearflowapp.Models.DebtRepayment;
+import com.vityazev_egor.debtclearflowapp.Models.CustomListModel;
 
-import java.io.IOException;
-
-import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -26,8 +28,6 @@ import okhttp3.Response;
 
 public class SecondActivity extends AppCompatActivity {
 
-    private Shared shared;
-    private String email;
     private final String TAG = "SecondActivity";
     private Handler handler;
     private CustomListViewAdapter adapter;
@@ -42,6 +42,12 @@ public class SecondActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onPause() {
+        isActive = false;
+        super.onPause();
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
@@ -51,30 +57,32 @@ public class SecondActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-        shared = new Shared(this);
-        email = shared.getData("email");
+        Shared shared = new Shared(this);
+        String email = shared.getData("email");
 
-        ReceptionModel[] data = new ReceptionModel[]{
-                new ReceptionModel(1, "a", "a"),
-                new ReceptionModel(2, "b", "b")
-        };
-        adapter = new CustomListViewAdapter(this, data);
+        adapter = new CustomListViewAdapter(this, new CustomListModel[]{});
         ListView listView = findViewById(R.id.listView);
         listView.setAdapter(adapter);
 
+        Button button = findViewById(R.id.btnLoginAsOtherUser);
+        button.setOnClickListener(v -> {
+            shared.clearData();
+            Intent intent = new Intent(SecondActivity.this, MainActivity.class);
+            startActivity(intent);
+        });
+
         handler = HandlerCompat.createAsync(Looper.getMainLooper());
-        new Thread(new ReceptionsGetter(email, shared.serverUrl)).start();
+        new Thread(new ReceptionsGetter(email, Shared.serverUrl)).start();
         isActive = true;
     }
 
 
     // TODO сделать десерилизацию ответа от сервера и добоавление новых объектов в ListView
     public class ReceptionsGetter implements Runnable{
-
         private final OkHttpClient client = new OkHttpClient().newBuilder().build();
-        private final MediaType mediaType = MediaType.parse("text/plain");
 
         private final Request request;
+        private final ObjectMapper mapper = new ObjectMapper();
 
         public ReceptionsGetter(String email, String serverUrl){
             RequestBody body = new MultipartBody.Builder().setType(MultipartBody.FORM)
@@ -84,6 +92,7 @@ public class SecondActivity extends AppCompatActivity {
                     .url(serverUrl + "findReceptions")
                     .method("POST", body)
                     .build();
+            mapper.registerModule(new JavaTimeModule());
         }
 
         @Override
@@ -91,8 +100,15 @@ public class SecondActivity extends AppCompatActivity {
             while (isActive) {
                 try {
                     Response response = client.newCall(request).execute();
-                    Log.i(TAG, response.body().string());
-                    adapter.addModel(new ReceptionModel(10, "t", "t"));
+                    assert response.body() != null;
+                    String responseString = response.body().string();
+                    Log.i(TAG, responseString);
+                    DebtRepayment[] receptions = mapper.readValue(responseString, DebtRepayment[].class);
+                    for (DebtRepayment reception : receptions){
+                        if (adapter.findModelById(reception.getId()) == null) {
+                            adapter.addModel(new CustomListModel(reception.getId(), reception.getName(), reception.getStarTime().toString()));
+                        }
+                    }
                     handler.post(() -> adapter.notifyDataSetChanged());
                 } catch (Exception e) {
                     Log.e(TAG, "I could not get receptions", e);
@@ -102,25 +118,6 @@ public class SecondActivity extends AppCompatActivity {
                     Thread.sleep(5000);
                 } catch (InterruptedException ignored) {}
             }
-        }
-    }
-
-    private void getReceptions(){
-        OkHttpClient client = new OkHttpClient().newBuilder().build();
-        MediaType mediaType = MediaType.parse("text/plain");
-        RequestBody body = new MultipartBody.Builder().setType(MultipartBody.FORM)
-                .addFormDataPart("email",email)
-                .build();
-        Request request = new Request.Builder()
-                .url(shared.serverUrl + "findReceptions")
-                .method("POST", body)
-                .build();
-        try {
-            Response response = client.newCall(request).execute();
-            Log.d(TAG, response.body().string());
-        } catch (IOException e) {
-            Log.e(TAG, "I could not get receptions", e);
-            shared.showSimpleAlert("Ошибка!","Не удалось получить данные от сервера");
         }
     }
 }
