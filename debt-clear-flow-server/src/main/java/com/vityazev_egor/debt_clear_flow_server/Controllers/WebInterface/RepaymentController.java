@@ -107,7 +107,6 @@ public class RepaymentController {
 
 
     // в этом методе буду использовать https://commons.apache.org/proper/commons-csv/user-guide.html
-    // TODO надо будет добавить взятие описание работы по названию столбца. Название столбца будет указыватся в форме
     @RequestMapping(value  =  "/view/{rpid}", method  = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ModelAndView addStudents(@RequestPart MultipartFile csvFile, @RequestPart String descriptionColumnName, @PathVariable("rpid") Integer Id){
         if (csvFile.getSize() > 0){
