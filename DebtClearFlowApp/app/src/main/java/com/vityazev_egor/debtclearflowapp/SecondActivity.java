@@ -76,8 +76,6 @@ public class SecondActivity extends AppCompatActivity {
         isActive = true;
     }
 
-
-    // TODO сделать десерилизацию ответа от сервера и добоавление новых объектов в ListView
     public class ReceptionsGetter implements Runnable{
         private final OkHttpClient client = new OkHttpClient().newBuilder().build();
 
