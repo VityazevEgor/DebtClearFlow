@@ -16,3 +16,4 @@ buildNumber.properties
 # JDT-specific (Eclipse Java Development Tools)
 .classpath
 /debt-clear-flow-server/csvFilesDirectory
+/debt-clear-flow-server/imagesDirectory

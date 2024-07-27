@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Login</title>
+    <!-- Подключение Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" th:href="@{~/custom.css}">
+</head>
+<body>
+    <div class="container">
+        <div th:replace="~{layout :: header}"></div>
+
+        <div class="row">
+            <!-- Блок информации о пользователе -->
+            <div class="col-md-6" th:if="${currentUser != null}">
+                <div class="card">
+                    <div class="card-header">
+                        Мои данные
+                    </div>
+                    <div class="card-body">
+                        <p>Имя: <span id="fullname" th:text="${currentUser.fullname}"></span></p>
+                        <p>Логин: <span id="login" th:text="${currentUser.login}"></span></p>
+                        <img id="profileImage" th:src="@{'~/images/' + ${currentUser.imageName}}" alt="Аватар пользователя">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Блоки справа -->
+            <div class="col-md-6">
+                <div class="alert alert-success" role="alert" th:if="${message != null}" th:text="${message}">
+                    This is a success alert—check it out!
+                </div>
+    
+                <div class="alert alert-danger" role="alert" th:if = "${errorMessage != null}" th:text="${errorMessage}">
+                    This is a danger alert—check it out!
+                </div>
+                <!-- Блок смены пароля -->
+                <div class="card">
+                    <div class="card-header">
+                        Смена пароля
+                    </div>
+                    <div class="card-body">
+                        <form id="passwordChangeForm" th:action="@{~/panel/account/changePassword}" method="post">
+                            <div class="form-group">
+                                <label for="currentPassword">Текущий пароль</label>
+                                <input type="password" class="form-control" id="currentPassword" name="currentPassword">
+                            </div>
+                            <div class="form-group">
+                                <label for="newPassword">Новый пароль</label>
+                                <input type="password" class="form-control" id="newPassword" name="newPassword">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Сменить пароль</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Блок смены фотографии профиля -->
+                <div class="card mt-3">
+                    <div class="card-header">
+                        Смена фотографии профиля
+                    </div>
+                    <div class="card-body">
+                        <form id="profileImageChangeForm">
+                            <div class="form-group">
+                                <label for="newProfileImage">Выберите новую фотографию</label>
+                                <input type="file" class="form-control-file" id="newProfileImage">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Установить новую фотографию</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Подключение Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</body>
+</html>

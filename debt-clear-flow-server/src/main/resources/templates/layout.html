@@ -18,19 +18,19 @@
 
             <div class="navbar-collapse collapse" id="navbarsExample09">
                 <ul class="navbar-nav mr-auto">
-                    <li class="nav-item active">
+                    <li class="nav-item">
                         <a class="nav-link" th:href="@{~/panel/myRepayments}">Мои отработки</span></a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" th:href="@{~/panel/createRepayment}">Создать отработку</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link disabled" href="#">Disabled</a>
+                        <a class="nav-link" href="#">Disabled</a>
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="http://example.com" id="dropdown09" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Dropdown</a>
+                        <a class="nav-link dropdown-toggle" href="http://example.com" id="dropdown09" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Настройки</a>
                         <div class="dropdown-menu" aria-labelledby="dropdown09">
-                            <a class="dropdown-item" href="#">Action</a>
+                            <a class="dropdown-item" th:href="@{~/panel/account/}">Мой аккаунт</a>
                             <a class="dropdown-item" href="#">Another action</a>
                             <a class="dropdown-item" href="#">Something else here</a>
                         </div>

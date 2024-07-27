@@ -46,6 +46,15 @@ public class InitMisc implements CommandLineRunner{
                 logger.error("Can't create csvDirectory", e);
             }
         }
+
+        if (!Files.exists(Shared.imagesDirectory)){
+            try {
+                Files.createDirectory(Shared.imagesDirectory);
+                logger.info("Created images directory");
+            } catch (IOException e) {
+                logger.error("Can't create imagesDirectory", e);
+            }
+        }
     }
 
     @Override

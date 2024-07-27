@@ -5,6 +5,7 @@ import java.util.regex.Pattern;
 // класс, который хранит статичные переменные для сервера и методы
 public class Shared {
     public static final Path csvFilesDirectory = Paths.get("csvFilesDirectory").toAbsolutePath();
+    public static final Path imagesDirectory = Paths.get("imagesDirectory").toAbsolutePath();
 
 
     private static final String emailRegex = "^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]+)*$";

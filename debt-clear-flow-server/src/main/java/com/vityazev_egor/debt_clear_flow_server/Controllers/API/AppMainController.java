@@ -21,6 +21,7 @@ public class AppMainController {
     @Autowired
     private DebtRepaymentRepo repaymentRepo;
 
+    @SuppressWarnings("unused")
     private final Logger logger = org.slf4j.LoggerFactory.getLogger(AppMainController.class);
 
     // получить список отработок на которые записан ученик
