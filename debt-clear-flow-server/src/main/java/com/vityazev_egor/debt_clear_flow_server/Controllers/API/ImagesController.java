@@ -32,7 +32,7 @@ public class ImagesController {
         byte[] image = null;
 
         try{
-            Files.readAllBytes(imagePath);
+            image = Files.readAllBytes(imagePath);
         }
         catch (IOException e){
             logger.error("Error while reading image file: " + imagePath.toString(), e);
@@ -40,7 +40,24 @@ public class ImagesController {
         }
 
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.IMAGE_JPEG);
+
+        // set correct content type dpepending on file extension
+        String fileExtension = imageName.substring(imageName.lastIndexOf("."));
+        switch (fileExtension){
+            case ".jpg":
+            case ".jpeg":
+                headers.setContentType(MediaType.IMAGE_JPEG);
+                break;
+            case ".png":
+                headers.setContentType(MediaType.IMAGE_PNG);
+                break;
+            case ".gif":
+                headers.setContentType(MediaType.IMAGE_GIF);
+                break;
+            default:
+                headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+                break;
+        }
 
         return ResponseEntity.ok().headers(headers).body(image);
     }

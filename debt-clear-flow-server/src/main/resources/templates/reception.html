@@ -26,7 +26,7 @@
                     </div>
                 </form>
 
-                <div class="alert alert-danger" role="alert" th:if="${currentStudent == null}">
+                <div class="alert alert-danger" role="alert" th:if="${currentStudent == null}" th:text="${errorMessage}">
                     Вы ещё не начали принимать студентов
                 </div>
                 <a class="btn btn-lg btn-primary" th:href="@{'~/panel/reception/' + ${repayment.id} + '/next'}" role="button">Принять следующего студента</a>

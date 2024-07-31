@@ -20,7 +20,7 @@
                     <div class="card-body">
                         <p>Имя: <span id="fullname" th:text="${currentUser.fullname}"></span></p>
                         <p>Логин: <span id="login" th:text="${currentUser.login}"></span></p>
-                        <img id="profileImage" th:src="@{'~/images/' + ${currentUser.imageName}}" alt="Аватар пользователя">
+                        <img th:src="@{'~/images/' + ${currentUser.imageName}}" alt="Аватар пользователя" style="width: 100%;">
                     </div>
                 </div>
             </div>
@@ -40,7 +40,7 @@
                         Смена пароля
                     </div>
                     <div class="card-body">
-                        <form id="passwordChangeForm" th:action="@{~/panel/account/changePassword}" method="post">
+                        <form id="passwordChangeForm" th:action="@{~/panel/account/changePassword}" method="post" enctype="multipart/form-data">
                             <div class="form-group">
                                 <label for="currentPassword">Текущий пароль</label>
                                 <input type="password" class="form-control" id="currentPassword" name="currentPassword">
@@ -60,10 +60,10 @@
                         Смена фотографии профиля
                     </div>
                     <div class="card-body">
-                        <form id="profileImageChangeForm">
+                        <form id="profileImageChangeForm" method="post" th:action="@{~/panel/account/setImage}" enctype="multipart/form-data">
                             <div class="form-group">
                                 <label for="newProfileImage">Выберите новую фотографию</label>
-                                <input type="file" class="form-control-file" id="newProfileImage">
+                                <input type="file" class="form-control-file" id="newProfileImage" name="newProfileImage">
                             </div>
                             <button type="submit" class="btn btn-primary">Установить новую фотографию</button>
                         </form>

@@ -21,6 +21,9 @@ public class AppMainController {
     @Autowired
     private DebtRepaymentRepo repaymentRepo;
 
+    @Autowired
+    private TeacherRepo teacherRepo;
+
     @SuppressWarnings("unused")
     private final Logger logger = org.slf4j.LoggerFactory.getLogger(AppMainController.class);
 
@@ -52,6 +55,20 @@ public class AppMainController {
         }
         
         return que.indexOf(student) + 1;
+    }
+
+    // получить информацию о преподавателе, который сейчас принимает студента
+    @PostMapping("getTeacherInfo")
+    public Teacher getTeacherInfo(@RequestPart String email, @RequestPart String repaymentId) {
+        QStudent currentStudent = studentRepo.findByEmailAndDebtRepaymentId(email, Integer.parseInt(repaymentId)).stream().findFirst().orElse(null);
+        if (currentStudent != null && currentStudent.getTeacherLogin() != null){
+            Teacher currentTeacher = teacherRepo.findByLogin(currentStudent.getTeacherLogin()).stream().findFirst().orElse(null);
+            if (currentTeacher != null){
+                currentTeacher.password = "nope";
+                return currentTeacher;
+            }
+        }
+        return null;
     }
     
 }

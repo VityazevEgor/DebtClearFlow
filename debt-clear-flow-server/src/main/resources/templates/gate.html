@@ -14,7 +14,7 @@
             <h1>DebtClearFlow</h1>
             <p class="lead">Система автоматизации организации очередей на отработки учебных задолжностей и экзаменов </p>
             <a class="btn btn-lg btn-primary" th:href="@{~/login}" role="button" th:if="${session == null or session.login == null}">Перейти к авторизации для преподавателей »</a>
-            <a class="btn btn-lg btn-primary" th:href="@{~/panel/}" role="button" th:if="${session != null and session.login != null}">Перейти к панели для преподавателей »</a>
+            <a class="btn btn-lg btn-primary" th:href="@{~/panel/myRepayments}" role="button" th:if="${session != null and session.login != null}">Перейти к панели для преподавателей »</a>
         </div>
     </div>
 

@@ -32,6 +32,15 @@ public class ReceptionController {
         QStudent currentStudent = qStudentRepo.findCurrentStudent(rpid, teacherLogin);
         mav.addObject("currentStudent", currentStudent);
 
+        if (currentStudent == null){
+            if (qStudentRepo.findByDebtRepaymentIdAndIsAcceptedFalseOrderByIdAsc(rpid).size() == 0){
+                mav.addObject("errorMessage", "Все студенты были приняты");
+            }
+            else {
+                mav.addObject("errorMessage", "Вы ещё не начили приём студентов");
+            }
+        }
+
         // ну и инфу о самой отработке лишней не будет
         mav.addObject("repayment", debtRepaymentRepo.findById(rpid).get());
         return mav;
