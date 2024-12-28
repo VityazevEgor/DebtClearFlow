@@ -5,8 +5,8 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.ServletContextInitializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
 import com.vityazev_egor.debt_clear_flow_server.Controllers.Filters.AuthFilter;
+import com.vityazev_egor.debt_clear_flow_server.Controllers.Filters.ReceptionAccessFilter;
 
 import java.util.*;
 
@@ -36,4 +36,13 @@ public class WebConfig {
         return registrationBean;
     }
 
+    @Bean
+    @Autowired
+    public FilterRegistrationBean<ReceptionAccessFilter> regReceptionFilter(ReceptionAccessFilter receptionAccessFilter) {
+        FilterRegistrationBean<ReceptionAccessFilter> registrationBean = new FilterRegistrationBean<>();
+        registrationBean.setFilter(receptionAccessFilter);
+        registrationBean.addUrlPatterns("/panel/reception/*");
+        registrationBean.setOrder(1);
+        return registrationBean;
+    }
 }

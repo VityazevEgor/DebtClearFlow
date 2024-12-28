@@ -61,7 +61,6 @@ public class AccountController {
         }
     }
 
-    @SuppressWarnings("null")
     @PostMapping("/setImage")
     public ModelAndView setImage(HttpSession session, @RequestParam MultipartFile newProfileImage){
         Teacher currentUser = getTeacherFromSession(session);

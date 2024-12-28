@@ -1,18 +1,16 @@
 package com.vityazev_egor.debt_clear_flow_server.Controllers.API;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
 
 import com.vityazev_egor.debt_clear_flow_server.Models.*;
 import java.util.*;
 
-
 @RestController
-@RequestMapping(path = "/api/")
+@RequestMapping("/api")
 public class AppMainController {
 
     @Autowired
@@ -24,50 +22,102 @@ public class AppMainController {
     @Autowired
     private TeacherRepo teacherRepo;
 
-    @SuppressWarnings("unused")
     private final Logger logger = org.slf4j.LoggerFactory.getLogger(AppMainController.class);
 
-    // получить список отработок на которые записан ученик
-    @PostMapping("findReceptions")
-    public List<DebtRepayment> findReceptions(@RequestPart String email) {
-        List<QStudent> students = studentRepo.findByEmail(email);
-        List<DebtRepayment> result = new ArrayList<>();
+    @GetMapping("/findReceptions")
+    public ResponseEntity<Map<String, Object>> findReceptions(@RequestParam String email) {
+        try {
+            List<QStudent> students = studentRepo.findByEmail(email);
+            List<DebtRepayment> result = students.stream()
+                .map(QStudent::getDebtRepayment)
+                .filter(Objects::nonNull)
+                .toList();
 
-        for (QStudent student : students) {
-            result.add(student.getDebtRepayment());
-        }
-
-        return result;
-    }
-
-    @PostMapping("findPosition")
-    public Integer findPosition(@RequestPart String email, @RequestPart String repaymentId){
-        var repayment = repaymentRepo.findById(Integer.parseInt(repaymentId)).orElse(null);
-        Integer position = -1;
-        // текущая очередь
-        List<QStudent> que = studentRepo.findByDebtRepaymentAndIsAcceptedFalseOrderByIdAsc(repayment);
-        QStudent student = que.stream().filter(s-> s.getEmail().equals(email)).findFirst().orElse(null);
-        if (student == null){
-            // если студент прошёл очередь то возвращаем -1
-            return position;
-        }
-        
-        return que.indexOf(student) + 1;
-    }
-
-    // получить информацию о преподавателе, который сейчас принимает студента
-    @PostMapping("getTeacherInfo")
-    public Teacher getTeacherInfo(@RequestPart String email, @RequestPart String repaymentId) {
-        var repayment = repaymentRepo.findById(Integer.parseInt(repaymentId)).orElse(null);
-        QStudent currentStudent = studentRepo.findByEmailAndDebtRepayment(email, repayment).stream().findFirst().orElse(null);
-        if (currentStudent != null && currentStudent.getTeacherLogin() != null){
-            Teacher currentTeacher = teacherRepo.findByLogin(currentStudent.getTeacherLogin()).stream().findFirst().orElse(null);
-            if (currentTeacher != null){
-                currentTeacher.setPassword("nope");
-                return currentTeacher;
+            if (result.isEmpty()) {
+                return ResponseEntity.ok(Map.of(
+                    "message", "No receptions found for the given email",
+                    "data", Collections.emptyList()
+                ));
             }
+
+            return ResponseEntity.ok(Map.of(
+                "message", "Receptions found successfully",
+                "data", result
+            ));
+        } catch (Exception e) {
+            logger.error("Error finding receptions for email: " + email, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("error", "Failed to retrieve receptions"));
         }
-        return null;
     }
-    
+
+    @GetMapping("/findPosition")
+    public ResponseEntity<Map<String, Object>> findPosition(@RequestParam String email, @RequestParam String repaymentId) {
+        try {
+            DebtRepayment repayment = repaymentRepo.findById(Integer.parseInt(repaymentId))
+                .orElseThrow(() -> new IllegalArgumentException("Invalid repayment ID"));
+
+            List<QStudent> studentsInQueue = studentRepo.findAllUnacceptedInQueue(repayment);
+            int position = studentsInQueue.stream()
+                .filter(s -> s.getEmail().equals(email))
+                .findFirst()
+                .map(s -> studentsInQueue.indexOf(s) + 1)
+                .orElse(-1);
+
+            if (position == -1) {
+                return ResponseEntity.ok(Map.of(
+                    "message", "Student not found in queue",
+                    "position", -1
+                ));
+            }
+
+            return ResponseEntity.ok(Map.of(
+                "message", "Position found successfully",
+                "position", position
+            ));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest()
+                .body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            logger.error("Error finding position for email: " + email, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("error", "Failed to retrieve queue position"));
+        }
+    }
+
+    @GetMapping("/getTeacherInfo")
+    public ResponseEntity<Map<String, Object>> getTeacherInfo(@RequestParam String email, @RequestParam String repaymentId) {
+        try {
+            DebtRepayment repayment = repaymentRepo.findById(Integer.parseInt(repaymentId))
+                .orElseThrow(() -> new IllegalArgumentException("Invalid repayment ID"));
+
+            return studentRepo.findByEmailAndDebtRepayment(email, repayment)
+                .stream()
+                .findFirst()
+                .map(QStudent::getTeacherLogin)
+                .map(login -> teacherRepo.findByLogin(login)
+                    .stream()
+                    .findFirst()
+                    .map(teacher -> {
+                        Teacher secureTeacher = teacher.clone();
+                        secureTeacher.setPassword(null);
+                        return ResponseEntity.ok(Map.of(
+                            "message", "Teacher found successfully",
+                            "data", secureTeacher
+                        ));
+                    })
+                    .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("message", "Teacher not found"))))
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message", "Student not found")));
+                    
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest()
+                .body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            logger.error("Error getting teacher info for email: " + email, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("error", "Failed to retrieve teacher information"));
+        }
+    }
 }

@@ -16,6 +16,8 @@
                 Добавить новых студентов на отработку <span th:text="${repayment.name}"></span>
             </div>
             <div class="card-body">
+                <div th:replace="~{layout :: errorAlert}"></div>
+                <div th:replace="~{layout :: successAlert}"></div>
                 <form method="post" enctype="multipart/form-data">
                     <div class="form-group">
                         <label for="file">Выберите CSV файл</label>
@@ -31,7 +33,7 @@
             </div>
         </div>
 
-        <!-- Таблица с данными обо всех отработках -->
+        <!-- Таблица с информацией о записавшихся студентах -->
         <table class="table table-striped mt-4">
             <thead>
                 <tr>

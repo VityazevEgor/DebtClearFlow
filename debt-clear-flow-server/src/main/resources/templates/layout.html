@@ -24,15 +24,11 @@
                     <li class="nav-item">
                         <a class="nav-link" th:href="@{~/panel/createRepayment}">Создать отработку</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Disabled</a>
-                    </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="http://example.com" id="dropdown09" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Настройки</a>
                         <div class="dropdown-menu" aria-labelledby="dropdown09">
                             <a class="dropdown-item" th:href="@{~/panel/account/}">Мой аккаунт</a>
-                            <a class="dropdown-item" href="#">Another action</a>
-                            <a class="dropdown-item" href="#">Something else here</a>
+                            <a class="dropdown-item" href="#">Настройка импорта</a>
                         </div>
                     </li>
                 </ul>
@@ -42,6 +38,12 @@
             </div>
         </nav>
 
+        <div th:fragment="errorAlert" class="alert alert-danger" role="alert" th:if = "${errorMessage != null}" th:text="${errorMessage}">
+            This is a danger alert—check it out!
+        </div>
+        <div th:fragment="successAlert"  class="alert alert-success" role="alert" th:if="${message != null}" th:text="${message}">
+            This is a success alert—check it out!
+        </div>
 
 
     </div>

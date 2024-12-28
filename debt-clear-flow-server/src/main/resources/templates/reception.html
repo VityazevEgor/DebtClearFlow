@@ -10,33 +10,123 @@
     <div class="container">
         <div th:replace="~{layout :: header}"></div>
 
-        <div class="card">
-            <div class="card-header">
-                Приём студентов на отработку - <span th:text="${repayment.name}"></span>
-            </div>
-            <div class="card-body">
-                <form method="post" enctype="multipart/form-data" th:if="${currentStudent != null}">
-                    <div class="form-group">
-                        <label for="file">ФИО студента</label>
-                        <input type="text" disabled class="form-control" name="fullName" th:value="${currentStudent.fullName}">
+        <div th:if="${isClosed == null}" class="modal fade" id="timeExpiredModal" tabindex="-1" aria-labelledby="timeExpiredModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="timeExpiredModalLabel">Время закончилось</h5>
                     </div>
-                    <div class="form-group">
-                        <label for="workDescriptionColumn">Описание задолжности</label>
-                        <input type="text" class="form-control" name="workDeskription" th:value="${currentStudent.workDeskription}">
+                    <div class="modal-body">
+                        Время отработки закончилось. Вы можете продлить время или завершить отработку.
                     </div>
-                </form>
-
-                <div class="alert alert-danger" role="alert" th:if="${currentStudent == null}" th:text="${errorMessage}">
-                    Вы ещё не начали принимать студентов
+                    <div class="modal-footer">
+                        <a th:href="@{'~/panel/reception/' + ${repayment.id} + '/extendTime'}" class="btn btn-primary">Продлить время</a>
+                        <a th:href="@{'~/panel/reception/' + ${repayment.id} + '/endReception'}" class="btn btn-danger">Завершить отработку</a>
+                    </div>
                 </div>
-                <a class="btn btn-lg btn-primary" th:href="@{'~/panel/reception/' + ${repayment.id} + '/next'}" role="button">Принять следующего студента</a>
             </div>
         </div>
+        
+        <div class="row">
+            <!-- Основной блок -->
+            <div class="col-md-8">
+                <div class="card mb-3">
+                    <div class="card-header">
+                        Приём студентов на отработку - <span th:text="${repayment.name}"></span>
+                    </div>
+                    <div class="card-body">
+                        <form th:if="${currentStudent != null}">
+                            <div class="form-group">
+                                <label for="file">ФИО студента</label>
+                                <input type="text" disabled class="form-control" name="fullName" th:value="${currentStudent.fullName}">
+                            </div>
+                            <div class="form-group">
+                                <label for="workDescriptionColumn">Описание задолжности</label>
+                                <input type="text" class="form-control" name="workDeskription" th:value="${currentStudent.workDeskription}">
+                            </div>
+                            <div class="d-flex justify-content-between mt-4">
+                                <a class="btn btn-success" th:href="@{'~/panel/reception/' + ${repayment.id} + '/accept'}">
+                                    Принять работу
+                                </a>
+                                <a class="btn btn-danger" th:href="@{'~/panel/reception/' + ${repayment.id} + '/reject'}">
+                                    Работа не принята
+                                </a>
+                                <a class="btn btn-warning" th:href="@{'~/panel/reception/' + ${repayment.id} + '/sendToEnd'}">
+                                    Отправить в конец очереди
+                                </a>
+                            </div>
+                        </form>
 
+                        <div class="alert alert-danger mt-4" role="alert" th:if="${currentStudent == null}" th:text="${errorMessage}">
+                            Тут будет сообщени с ошибкой
+                        </div>
+                        <a th:if="${currentStudent == null and isClosed == null}" class="btn btn-lg btn-primary mt-3" th:href="@{'~/panel/reception/' + ${repayment.id} + '/next'}" role="button">
+                            Начать приём
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Боковая панель -->
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        Информация об отработке
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Время до конца отработки:</strong></p>
+                        <p class="text-primary h4">
+                            <span id="time-left-value" th:text="${timeLeft}"></span>
+                            <span>минут</span>
+                        </p>
+
+                        <hr>
+
+                        <p><strong>Студентов в очереди:</strong></p>
+                        <p class="text-success h4" th:text="${queueSize}"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Подключение Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script>
+        // Функция для обновления времени
+        function updateTimeLeft() {
+            const timeLeftElement = document.getElementById('time-left-value');
+            let timeLeft = parseInt(timeLeftElement.textContent, 10);
+    
+            if (timeLeft > 0) {
+                timeLeft -= 1;
+                timeLeftElement.textContent = timeLeft;
+            } else if (timeLeft === 0) {
+                showTimeExpiredModal();
+            }
+        }
+    
+        // Функция для показа модального окна
+        function showTimeExpiredModal() {
+            const modal = new bootstrap.Modal(document.getElementById('timeExpiredModal'));
+            modal.show();
+        }
+    
+        // Проверяем значение времени при загрузке страницы
+        document.addEventListener("DOMContentLoaded", () => {
+            const timeLeftElement = document.getElementById('time-left-value');
+            let timeLeft = parseInt(timeLeftElement.textContent, 10);
+    
+            if (timeLeft === 0) {
+                showTimeExpiredModal();
+            }
+        });
+    
+        // Запускаем уменьшение каждую минуту
+        setInterval(updateTimeLeft, 60000);
+    </script>
+    
+  
 </body>
 </html>

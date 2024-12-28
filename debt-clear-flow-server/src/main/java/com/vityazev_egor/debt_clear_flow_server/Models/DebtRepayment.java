@@ -8,6 +8,7 @@ import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -21,28 +22,32 @@ import lombok.Data;
 @Entity
 @Data
 public class DebtRepayment {
+    public enum RepaymentStatus{
+        OPEN,
+        CLOSED,
+        WAITING
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
 
-    @NotBlank(message = "Name is blank")
-    @Size(min = 1, max = 100, message = "Name is too long")
+    @NotBlank(message = "Название отработки не может быть пустым")
+    @Size(min = 1, max = 100, message = "Длина названия отроботки должна быть от 1 до 100 символов")
     private String name;
     // кабинет где проводится отработка
-    @NotBlank(message  = "Closet is blank")
+    @NotBlank(message  = "Указание кабинета отработки обязательно")
     private String closet;
     
-    @NotNull
+    @NotNull(message = "Начало отработки должно быть указано")
     private LocalDateTime starTime;
-    @NotNull
+    @NotNull(message = "Конец отработки должен быть указан")
     private LocalDateTime endTime;
 
-    // Используем @ManyToMany так как один учитель может участвовать в нескольких отработках,
-    // и в одной отработке может участвовать несколько учителей
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "debt_repayment_teachers", joinColumns = @JoinColumn(name = "debt_repayment_id"))
     @Column(name = "teacher_login")
     private List<String> teachersLogins = new ArrayList<>();
 
-    private Boolean isOpen = false;
+    private RepaymentStatus status = RepaymentStatus.WAITING;
 }

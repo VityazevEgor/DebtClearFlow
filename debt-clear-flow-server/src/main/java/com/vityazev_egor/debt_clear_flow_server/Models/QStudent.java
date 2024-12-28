@@ -25,8 +25,10 @@ public class QStudent {
     @JoinColumn(name = "repayment_id", nullable = false)
     private DebtRepayment debtRepayment;
 
-    // был ли студент уже принят преподователем
+    // была ли работа студента принята
     private Boolean isAccepted = false;
+    // была ли работа студента отклонена
+    private Boolean isRejected = false;
 
     // находится ли студент сейчас на приёме у преподователя
     private Boolean isInProcess = false;
@@ -36,5 +38,15 @@ public class QStudent {
 
     public Boolean checkEmailAndFullName(){
         return fullName != null && email != null;
+    }
+
+    public QStudent createCleanCopy(){
+        var copy = new QStudent();
+        copy.setFullName(fullName);
+        copy.setEmail(email);
+        copy.setWorkDeskription(workDeskription);
+        copy.setDebtRepayment(debtRepayment);
+
+        return copy;
     }
 }

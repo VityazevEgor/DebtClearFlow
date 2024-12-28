@@ -15,25 +15,23 @@
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th scope="col">ID</th>
                     <th scope="col">Название</th>
                     <th scope="col">Кабинет</th>
                     <th scope="col">Время начала</th>
                     <th scope="col">Время окончания</th>
                     <th scope="col">Логины преподавателей</th>
-                    <th scope="col">Открыто</th>
+                    <th scope="col">Состояние</th>
                     <th scope="col">Действия</th>
                 </tr>
             </thead>
             <tbody>
                 <tr th:each="debtRepayment : ${debtRepayments}">
-                    <td th:text="${debtRepayment.id}"></td>
                     <td th:text="${debtRepayment.name}"></td>
                     <td th:text="${debtRepayment.closet}"></td>
-                    <td th:text="${debtRepayment.starTime}"></td>
-                    <td th:text="${debtRepayment.endTime}"></td>
+                    <td th:text="${#temporals.format(debtRepayment.starTime, 'dd.MM.yyyy HH:mm')}"></td>
+                    <td th:text="${#temporals.format(debtRepayment.endTime, 'dd.MM.yyyy HH:mm')}"></td>
                     <td th:text="${debtRepayment.teachersLogins}"></td>
-                    <td th:text="${debtRepayment.isOpen}"></td>
+                    <td th:text="${debtRepayment.status}"></td>
                     <td>
                         <a th:href="@{'~/panel/reception/' + ${debtRepayment.id}}" class="btn btn-outline-success">Начать приём</a>
                         <a th:href="@{'~/panel/view/' + ${debtRepayment.id}}" class="btn btn-primary">Списки</a>
