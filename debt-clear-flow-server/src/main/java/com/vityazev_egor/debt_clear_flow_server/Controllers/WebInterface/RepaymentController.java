@@ -1,5 +1,6 @@
 package com.vityazev_egor.debt_clear_flow_server.Controllers.WebInterface;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.csv.CSVFormat;
@@ -20,10 +21,12 @@ import com.vityazev_egor.debt_clear_flow_server.Models.DebtRepayment;
 import com.vityazev_egor.debt_clear_flow_server.Models.DebtRepaymentRepo;
 import com.vityazev_egor.debt_clear_flow_server.Models.QStudent;
 import com.vityazev_egor.debt_clear_flow_server.Models.QStudentRepo;
+import com.vityazev_egor.debt_clear_flow_server.Models.TeacherRepo;
 
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -39,6 +42,9 @@ public class RepaymentController {
     private DebtRepaymentRepo debtRepaymentRepo;
 
     @Autowired
+    private TeacherRepo teacherRepo;
+
+    @Autowired
     private QStudentRepo qStudentRepo;
 
     private final Logger logger = org.slf4j.LoggerFactory.getLogger(RepaymentController.class);
@@ -46,6 +52,7 @@ public class RepaymentController {
     private ModelAndView createRepayment(){
         var mv = new ModelAndView("createRepayment");
         mv.addObject("repayment", new DebtRepayment());
+        mv.addObject("teachers", teacherRepo.findAll());
         return mv;
     }
 
@@ -56,7 +63,16 @@ public class RepaymentController {
 
     // создание новой отработки
     @RequestMapping(path = "createRepayment", method=RequestMethod.POST, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    public ModelAndView postCreateRepayment(@Valid @ModelAttribute DebtRepayment repayment, BindingResult bindingResult, HttpSession session){
+    public ModelAndView postCreateRepayment(
+        @RequestParam(value = "teachersLogins", required = false) String[] teacherLoginsArray,
+        @Valid @ModelAttribute DebtRepayment repayment,
+        BindingResult bindingResult,
+        HttpSession session)
+    {
+        // Получаем учителей по их логинам
+        if (teacherLoginsArray != null && teacherLoginsArray.length > 0) {
+            repayment.setTeachersLogins(Arrays.asList(teacherLoginsArray));
+        }
         logger.info("Got model in 'postCreateRepayment': "+ repayment.toString());
         if (bindingResult.hasErrors()){
             logger.error("Data didn't pass validation in 'createRepayment'");
@@ -64,21 +80,23 @@ public class RepaymentController {
             for (var error : errors){
                 logger.error(error.getDefaultMessage() + ":" + error.getObjectName());
             }
+            // TODO add error message to view
+            return createRepayment();
         }
-        else{
-            logger.info("Data passed validation in 'createRepayment'");
-            // добовляем логин преподователя, который создал эту отработку
-            repayment.setTeachersLogins(repayment.getTeachersLogins()+", " + session.getAttribute("login").toString());
-            debtRepaymentRepo.save(repayment);
-            logger.info("Saved model!");
+
+        String currentTeacherLogin = session.getAttribute("login").toString();
+        if (!repayment.getTeachersLogins().stream().anyMatch(login -> login.equals(currentTeacherLogin))){
+            repayment.getTeachersLogins().add(currentTeacherLogin);
         }
+        debtRepaymentRepo.save(repayment);
         return createRepayment();
     }
 
     // просмотр всех отработок созданных препеодаватлем или к которым он имеет доступ
     @GetMapping("myRepayments")
     public ModelAndView getmyRepayments(HttpSession session){
-        List<DebtRepayment> debtRepayments = debtRepaymentRepo.findByTeachersLoginsContaining(session.getAttribute("login").toString());
+        var teacher = session.getAttribute("login").toString();
+        List<DebtRepayment> debtRepayments = debtRepaymentRepo.findByTeachersLoginsContaining(teacher);
         return new ModelAndView("myRepayments", "debtRepayments", debtRepayments);
     }
 
@@ -92,7 +110,7 @@ public class RepaymentController {
 
     private ModelAndView getViewRepaymentModelById(Integer id){
         var repayment = debtRepaymentRepo.findById(id).get();
-        List<QStudent> qStudents  = qStudentRepo.findByDebtRepaymentIdOrderByIdAsc(repayment.getId());
+        List<QStudent> qStudents  = qStudentRepo.findByDebtRepaymentOrderByIdAsc(repayment);
         var mv  = new ModelAndView("viewRepayment");
         mv.addObject("repayment", repayment);
         mv.addObject("qStudents", qStudents);
@@ -108,7 +126,8 @@ public class RepaymentController {
 
     // в этом методе буду использовать https://commons.apache.org/proper/commons-csv/user-guide.html
     @RequestMapping(value  =  "/view/{rpid}", method  = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ModelAndView addStudents(@RequestPart MultipartFile csvFile, @RequestPart String descriptionColumnName, @PathVariable("rpid") Integer Id){
+    public ModelAndView addStudents(@RequestPart MultipartFile csvFile, @RequestPart String descriptionColumnName, @PathVariable("rpid") Integer id){
+        var repayment = debtRepaymentRepo.findById(id).get();
         if (csvFile.getSize() > 0){
             logger.info("Got file! File size = " + csvFile.getSize());
             String fileName = java.util.UUID.randomUUID().toString() + ".csv";
@@ -122,7 +141,7 @@ public class RepaymentController {
                 for (CSVRecord record : records) {
                     List<String> columnsData = record.toList();
                     var qStudent  = new QStudent();
-                    qStudent.setDebtRepaymentId(Id);
+                    qStudent.setDebtRepayment(repayment);
 
                     for (String data : columnsData){
                         if (Shared.isEmail(data)){
@@ -153,13 +172,14 @@ public class RepaymentController {
         else{
             logger.error("Can't get file");
         }
-        return getViewRepaymentModelById(Id);
+        return getViewRepaymentModelById(id);
     }
 
     // очистить список записанных студентов
     @RequestMapping(value  =  "/clearAll/{rpid}", method  = RequestMethod.GET)
     public ModelAndView clearAll(@PathVariable("rpid") Integer id){
-        List<QStudent> setudents  = qStudentRepo.findByDebtRepaymentIdOrderByIdAsc(id);
+        var repayment = debtRepaymentRepo.findById(id).get();
+        List<QStudent> setudents  = qStudentRepo.findByDebtRepaymentOrderByIdAsc(repayment);
         qStudentRepo.deleteAll(setudents);
         return new ModelAndView("redirect:/panel/view/"+id.toString());
     }

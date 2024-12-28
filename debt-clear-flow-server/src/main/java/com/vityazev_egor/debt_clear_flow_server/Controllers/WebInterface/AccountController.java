@@ -37,7 +37,7 @@ public class AccountController {
     public ModelAndView getAccountView(HttpSession session){
         Teacher currentUser = getTeacherFromSession(session);
         
-        logger.info("Got teacher with id = "+ currentUser.id);
+        logger.info("Got teacher with id = "+ currentUser.getId());
         return new ModelAndView("account", "currentUser", currentUser);
     }
 
@@ -47,15 +47,15 @@ public class AccountController {
         ModelAndView modelAndView = new ModelAndView("account", "currentUser", currentUser);
 
         logger.info("Got rs in 'changePassword' - " + currentPassword + ":" + newPassword);
-        if(currentUser.password.equals(currentPassword)){
-            currentUser.password = newPassword;
+        if(currentUser.getPassword().equals(currentPassword)){
+            currentUser.setPassword(newPassword);
             teacherRepo.save(currentUser);
-            logger.info("Password changed for user - " + currentUser.login);
+            logger.info("Password changed for user - " + currentUser.getLogin());
             modelAndView.addObject("message", "Пароль был успешно изменён!");
             return modelAndView;
         }
         else{
-            logger.warn("Current password is not correct for user - "+ currentUser.login);
+            logger.warn("Current password is not correct for user - "+ currentUser.getLogin());
             modelAndView.addObject("errorMessage", "Введеённый пароль не совпадает с текущим");
             return modelAndView;
         }
@@ -98,10 +98,10 @@ public class AccountController {
         logger.info("New file name - " + newFileName);
 
         // delete original file if is not present
-        if (currentUser.imageName != null && !currentUser.imageName.contains("defaultImage")){
-            logger.info("Deleting old file - " + currentUser.imageName);
+        if (currentUser.getImageName() != null && !currentUser.getImageName().contains("defaultImage")){
+            logger.info("Deleting old file - " + currentUser.getImageName());
             try{
-                Paths.get(Shared.imagesDirectory.toString(), currentUser.imageName).toFile().delete();
+                Paths.get(Shared.imagesDirectory.toString(), currentUser.getImageName()).toFile().delete();
             } catch (Exception ex){
                 logger.error("Can't delete old image", ex);
             }
@@ -116,7 +116,7 @@ public class AccountController {
             return view;
         }
 
-        currentUser.imageName = newFileName;
+        currentUser.setImageName(newFileName);
         teacherRepo.save(currentUser);
         view.addObject("message", "Аватар профиля был успешно обновлён!");
         return view;

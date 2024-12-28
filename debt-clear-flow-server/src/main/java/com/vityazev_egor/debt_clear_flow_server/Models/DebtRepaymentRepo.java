@@ -6,5 +6,8 @@ import java.util.List;
 
 public interface DebtRepaymentRepo extends JpaRepository<DebtRepayment, Integer>{
     // найти отработки, к которым определённый преподаватель имеет доступ
-    List<DebtRepayment> findByTeachersLoginsContaining(String teachersLogins);
+    // List<DebtRepayment> findByTeachersLoginsContaining(String teachersLogins);
+    // найти отработки, к которым определённый преподаватель имеет доступ
+    List<DebtRepayment> findByTeachersLoginsContaining(String teacherLogin);
+    
 }

@@ -34,10 +34,7 @@ public class AppMainController {
         List<DebtRepayment> result = new ArrayList<>();
 
         for (QStudent student : students) {
-            DebtRepayment r = repaymentRepo.findById(student.getDebtRepaymentId()).orElse(null);
-            if (r != null){
-                result.add(r);
-            }
+            result.add(student.getDebtRepayment());
         }
 
         return result;
@@ -45,9 +42,10 @@ public class AppMainController {
 
     @PostMapping("findPosition")
     public Integer findPosition(@RequestPart String email, @RequestPart String repaymentId){
+        var repayment = repaymentRepo.findById(Integer.parseInt(repaymentId)).orElse(null);
         Integer position = -1;
         // текущая очередь
-        List<QStudent> que = studentRepo.findByDebtRepaymentIdAndIsAcceptedFalseOrderByIdAsc(Integer.parseInt(repaymentId));
+        List<QStudent> que = studentRepo.findByDebtRepaymentAndIsAcceptedFalseOrderByIdAsc(repayment);
         QStudent student = que.stream().filter(s-> s.getEmail().equals(email)).findFirst().orElse(null);
         if (student == null){
             // если студент прошёл очередь то возвращаем -1
@@ -60,11 +58,12 @@ public class AppMainController {
     // получить информацию о преподавателе, который сейчас принимает студента
     @PostMapping("getTeacherInfo")
     public Teacher getTeacherInfo(@RequestPart String email, @RequestPart String repaymentId) {
-        QStudent currentStudent = studentRepo.findByEmailAndDebtRepaymentId(email, Integer.parseInt(repaymentId)).stream().findFirst().orElse(null);
+        var repayment = repaymentRepo.findById(Integer.parseInt(repaymentId)).orElse(null);
+        QStudent currentStudent = studentRepo.findByEmailAndDebtRepayment(email, repayment).stream().findFirst().orElse(null);
         if (currentStudent != null && currentStudent.getTeacherLogin() != null){
             Teacher currentTeacher = teacherRepo.findByLogin(currentStudent.getTeacherLogin()).stream().findFirst().orElse(null);
             if (currentTeacher != null){
-                currentTeacher.password = "nope";
+                currentTeacher.setPassword("nope");
                 return currentTeacher;
             }
         }

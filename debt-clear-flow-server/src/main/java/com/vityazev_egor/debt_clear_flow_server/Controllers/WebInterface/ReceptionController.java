@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.vityazev_egor.debt_clear_flow_server.Models.DebtRepaymentRepo;
-import com.vityazev_egor.debt_clear_flow_server.Models.QStudent;
 import com.vityazev_egor.debt_clear_flow_server.Models.QStudentRepo;
 
 import jakarta.servlet.http.HttpSession;
@@ -27,43 +26,44 @@ public class ReceptionController {
     public ModelAndView getReception(@PathVariable Integer rpid, HttpSession session){
         String teacherLogin = (String)session.getAttribute("login");
         var mav = new ModelAndView("reception");
+        var repayment = debtRepaymentRepo.findById(rpid).get();
 
         // в начале мы берём текущего студента на приеме и добовляем его к представлению
-        QStudent currentStudent = qStudentRepo.findCurrentStudent(rpid, teacherLogin);
-        mav.addObject("currentStudent", currentStudent);
-
-        if (currentStudent == null){
-            if (qStudentRepo.findByDebtRepaymentIdAndIsAcceptedFalseOrderByIdAsc(rpid).size() == 0){
-                mav.addObject("errorMessage", "Все студенты были приняты");
+        qStudentRepo.findCurrentStudent(repayment, teacherLogin).ifPresentOrElse(
+            student ->{
+                mav.addObject("currentStudent", student);
+            },
+            () -> {
+                if (qStudentRepo.findByDebtRepaymentAndIsAcceptedFalseOrderByIdAsc(repayment).size() == 0){
+                    mav.addObject("errorMessage", "Все студенты были приняты");
+                }
+                else {
+                    mav.addObject("errorMessage", "Вы ещё не начали приём студентов");
+                }
             }
-            else {
-                mav.addObject("errorMessage", "Вы ещё не начили приём студентов");
-            }
-        }
+        );
 
         // ну и инфу о самой отработке лишней не будет
-        mav.addObject("repayment", debtRepaymentRepo.findById(rpid).get());
+        mav.addObject("repayment", repayment);
         return mav;
     }
 
     @RequestMapping(value = "/reception/{rpid}/next", method = RequestMethod.GET)
     public ModelAndView getReceptionNext(@PathVariable Integer rpid, HttpSession session){
         String teacherLogin = (String)session.getAttribute("login");
+        var repayment = debtRepaymentRepo.findById(rpid).get();
         // если текущий студент был то мы обновляем инфу о том что он был принят
-        QStudent currentStudent = qStudentRepo.findCurrentStudent(rpid, teacherLogin);
-        if (currentStudent != null){
-            currentStudent.setIsAccepted(true);
-            currentStudent.setIsInProcess(false);
-            qStudentRepo.save(currentStudent);
-        }
+        qStudentRepo.findCurrentStudent(repayment, teacherLogin).ifPresent(student ->{
+            student.setIsAccepted(true);
+            student.setIsInProcess(false);
+            qStudentRepo.save(student);
+        });
 
-        QStudent nextStudent = qStudentRepo.findFirstByDebtRepaymentIdAndIsAcceptedFalseAndIsInProcessFalseOrderByIdAsc(rpid);
-        if (nextStudent != null){
-            nextStudent.setIsInProcess(true);
-            nextStudent.setTeacherLogin(teacherLogin);
-            qStudentRepo.save(nextStudent);
-        }
-
+        qStudentRepo.findNextUnacceptedInQueue(repayment).ifPresent(student ->{
+            student.setIsInProcess(true);
+            student.setTeacherLogin(teacherLogin);
+            qStudentRepo.save(student);
+        });
         return new ModelAndView("redirect:/panel/reception/" + rpid.toString());
     }
 

@@ -24,10 +24,21 @@ public class InitMisc implements CommandLineRunner{
     private void createTestAccount(){
         if (teacherRepo.findByLogin("test").isEmpty()){
             var t = new Teacher();
-            t.fullname = "test";
-            t.login  =  "test";
-            t.password   =  "test";
-            t.imageName = "test";
+            t.setFullname("Полное Имя");
+            t.setLogin("test");
+            t.setPassword("test");
+
+            teacherRepo.save(t);
+            logger.info("Added test account");
+        }
+        else{
+            logger.info("Test account already exists");
+        }
+        if (teacherRepo.findByLogin("test2").isEmpty()){
+            var t = new Teacher();
+            t.setFullname("Полное Имя2");
+            t.setLogin("test2");
+            t.setPassword("test");
 
             teacherRepo.save(t);
             logger.info("Added test account");

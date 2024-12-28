@@ -25,6 +25,7 @@ public class WebConfig {
         };
     }
 
+    // регистрирует фильтр для ограничение не авторизованных пользователей.
     @Bean
     @Autowired
     public FilterRegistrationBean<AuthFilter> regAuthFilter(AuthFilter authFilter) {
