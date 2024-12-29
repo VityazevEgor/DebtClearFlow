@@ -7,6 +7,10 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vityazev_egor.debt_clear_flow_server.Models.*;
+
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.util.*;
 
 @RestController
@@ -24,33 +28,30 @@ public class AppMainController {
 
     private final Logger logger = org.slf4j.LoggerFactory.getLogger(AppMainController.class);
 
-    @GetMapping("/findReceptions")
-    public ResponseEntity<Map<String, Object>> findReceptions(@RequestParam String email) {
+    @Data
+    @NoArgsConstructor
+    private static class EmailRequest {
+        private String email;
+    }
+
+    @PostMapping("/findReceptions")
+    public ResponseEntity<?> findReceptions(@RequestBody EmailRequest emailRequest) {
         try {
-            List<QStudent> students = studentRepo.findByEmail(email);
+            List<QStudent> students = studentRepo.findByEmail(emailRequest.getEmail());
             List<DebtRepayment> result = students.stream()
                 .map(QStudent::getDebtRepayment)
                 .filter(Objects::nonNull)
                 .toList();
 
-            if (result.isEmpty()) {
-                return ResponseEntity.ok(Map.of(
-                    "message", "No receptions found for the given email",
-                    "data", Collections.emptyList()
-                ));
-            }
-
-            return ResponseEntity.ok(Map.of(
-                "message", "Receptions found successfully",
-                "data", result
-            ));
+            return ResponseEntity.ok(result);
         } catch (Exception e) {
-            logger.error("Error finding receptions for email: " + email, e);
+            logger.error("Error finding receptions for email: " + emailRequest.getEmail(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(Map.of("error", "Failed to retrieve receptions"));
         }
     }
 
+    // TODO переделать методы ниже, чтобы они принимали JSON
     @GetMapping("/findPosition")
     public ResponseEntity<Map<String, Object>> findPosition(@RequestParam String email, @RequestParam String repaymentId) {
         try {

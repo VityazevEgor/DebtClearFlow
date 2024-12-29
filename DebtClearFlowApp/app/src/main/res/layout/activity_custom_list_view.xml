@@ -17,25 +17,60 @@
         android:layout_weight="1"
         android:orientation="vertical">
 
+        <!-- Блок названия отработки -->
+        <TextView
+            android:id="@+id/reception_name_label"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Название:"
+            android:textStyle="bold"
+            android:textSize="14sp" />
+
         <TextView
             android:id="@+id/reception_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Название отработки"
+            android:layout_marginBottom="8dp"
             android:textSize="16sp" />
+
+        <!-- Блок даты отработки -->
+        <TextView
+            android:id="@+id/reception_date_label"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Дата:"
+            android:textStyle="bold"
+            android:textSize="14sp" />
 
         <TextView
             android:id="@+id/reception_date"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Дата отработки"
+            android:layout_marginBottom="8dp"
             android:textSize="16sp" />
+
+        <!-- Блок кабинета отработки -->
+        <TextView
+            android:id="@+id/reception_room_label"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Кабинет:"
+            android:textStyle="bold"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/reception_room"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="16sp" />
+
     </LinearLayout>
 
     <Button
         android:id="@+id/go_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
         android:text="Перейти" />
 
 </LinearLayout>

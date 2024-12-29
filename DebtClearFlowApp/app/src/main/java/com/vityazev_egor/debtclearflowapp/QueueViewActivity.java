@@ -22,7 +22,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class RepaymentViewActivity extends AppCompatActivity {
+public class QueueViewActivity extends AppCompatActivity {
 
     private Handler handler;
     private TextView queuePositionNumber;
@@ -62,7 +62,7 @@ public class RepaymentViewActivity extends AppCompatActivity {
 
         Button button = findViewById(R.id.backButton);
         button.setOnClickListener(v -> {
-            Intent intent = new Intent(this, SecondActivity.class);
+            Intent intent = new Intent(this, MyRetakesActivity.class);
             startActivity(intent);
         });
 

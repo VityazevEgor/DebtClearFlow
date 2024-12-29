@@ -73,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loadSecondForm(){
-        Intent intent = new Intent(MainActivity.this, SecondActivity.class);
+        Intent intent = new Intent(MainActivity.this, MyRetakesActivity.class);
         startActivity(intent);
     }
 
