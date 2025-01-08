@@ -51,36 +51,41 @@ public class AppMainController {
         }
     }
 
+    @Data
+    @NoArgsConstructor
+    private static class FindPositionRequest {
+        private String email;
+        private Integer repaymentId;
+    }
+
     // TODO переделать методы ниже, чтобы они принимали JSON
     @GetMapping("/findPosition")
-    public ResponseEntity<Map<String, Object>> findPosition(@RequestParam String email, @RequestParam String repaymentId) {
+    public ResponseEntity<Map<String, Object>> findPosition(@RequestBody FindPositionRequest findPositionRequest) {
         try {
-            DebtRepayment repayment = repaymentRepo.findById(Integer.parseInt(repaymentId))
+            DebtRepayment repayment = repaymentRepo.findById(findPositionRequest.getRepaymentId())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid repayment ID"));
 
             List<QStudent> studentsInQueue = studentRepo.findAllUnacceptedInQueue(repayment);
             int position = studentsInQueue.stream()
-                .filter(s -> s.getEmail().equals(email))
+                .filter(s -> s.getEmail().equals(findPositionRequest.getEmail()))
                 .findFirst()
                 .map(s -> studentsInQueue.indexOf(s) + 1)
                 .orElse(-1);
 
             if (position == -1) {
                 return ResponseEntity.ok(Map.of(
-                    "message", "Student not found in queue",
                     "position", -1
                 ));
             }
 
             return ResponseEntity.ok(Map.of(
-                "message", "Position found successfully",
                 "position", position
             ));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest()
                 .body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
-            logger.error("Error finding position for email: " + email, e);
+            logger.error("Error finding position for email: " + findPositionRequest.getEmail(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(Map.of("error", "Failed to retrieve queue position"));
         }
