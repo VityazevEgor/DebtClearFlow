@@ -4,6 +4,17 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.util.Log;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import okhttp3.MediaType;
+import okhttp3.Request;
+import okhttp3.RequestBody;
 
 public class Shared {
     private final Context context;
@@ -38,5 +49,23 @@ public class Shared {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {}
                 }).show();
+    }
+
+    public static Request buildJsonPostRequest(Map<String, String> data, String apiPath){
+        ObjectMapper mapper = new ObjectMapper();
+        String jsonString;
+        try {
+            jsonString = mapper.writeValueAsString(data);
+        } catch (JsonProcessingException e) {
+            Log.e("SHARED", "Error creating JSON", e);
+            jsonString = "{}";
+        }
+        MediaType JSON = MediaType.get("application/json; charset=utf-8");
+        RequestBody body = RequestBody.create(jsonString, JSON);
+        return new Request.Builder()
+                .url(serverUrl + apiPath)
+                .post(body)
+                .addHeader("Content-Type", "application/json")
+                .build();
     }
 }

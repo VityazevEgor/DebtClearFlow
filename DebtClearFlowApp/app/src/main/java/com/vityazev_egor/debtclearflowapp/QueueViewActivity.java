@@ -16,6 +16,18 @@ import androidx.core.os.HandlerCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
+import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -24,21 +36,20 @@ import okhttp3.Response;
 
 public class QueueViewActivity extends AppCompatActivity {
 
-    private Handler handler;
     private TextView queuePositionNumber;
 
-    private Boolean isActive = true;
-    private final String TAG = "RepaymentViewActivity";
+    private final String TAG = "QueueViewActivity";
+    private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
     @Override
     protected void onPause() {
-        isActive = false;
+        scheduler.shutdown();
         super.onPause();
     }
 
     @Override
     protected void onStop(){
-        isActive = false;
+        scheduler.shutdown();
         super.onStop();
     }
 
@@ -52,13 +63,9 @@ public class QueueViewActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-        handler = HandlerCompat.createAsync(Looper.getMainLooper());
 
         queuePositionNumber = findViewById(R.id.queuePositionNumber);
         Toolbar toolbar = findViewById(R.id.toolbar);
-
-        Bundle bundle = getIntent().getExtras();
-
 
         Button button = findViewById(R.id.backButton);
         button.setOnClickListener(v -> {
@@ -66,10 +73,11 @@ public class QueueViewActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
+        Bundle bundle = getIntent().getExtras();
         if (bundle != null) {
             Integer repaymentId = bundle.getInt("id");
             String email = new Shared(this).getData("email");
-            if (repaymentId == null || email == null) {
+            if (repaymentId == 0 || email == null) {
                 Log.e(TAG, "Can't get repayment id from bundle or email is nulls");
                 new Shared(this).showSimpleAlert("Error", "Что-то пошло не так при иницилизации формы");
                 return;
@@ -77,41 +85,63 @@ public class QueueViewActivity extends AppCompatActivity {
 
             queuePositionNumber.setText(String.valueOf(bundle.getInt("id")));
             toolbar.setTitle(bundle.getString("name"));
-            new Thread(new PositionUpdater(email, repaymentId, Shared.serverUrl)).start();
+            scheduler.scheduleWithFixedDelay(
+                    new PositionUpdater(email, repaymentId, Shared.serverUrl),
+                    0,
+                    4,
+                    TimeUnit.SECONDS
+            );
         }
     }
 
     // класс который получает информацию о текущем положении в очереди студента
     private class PositionUpdater implements Runnable {
         private final OkHttpClient client = new OkHttpClient().newBuilder().build();
+        private final ObjectMapper mapper = new ObjectMapper();
         private final Request request;
 
-        public PositionUpdater(String email, int repaymentId, String serverUrl) {
-            RequestBody body = new MultipartBody.Builder().setType(MultipartBody.FORM)
-                    .addFormDataPart("email", email)
-                    .addFormDataPart("repaymentId", String.valueOf(repaymentId))
-                    .build();
+        public PositionUpdater(String email, Integer repaymentId, String serverUrl) {
+            Map<String, String> jsonBody = Map.of("email", email, "repaymentId", repaymentId.toString());
+            this.request = Shared.buildJsonPostRequest(jsonBody, "findPosition");
+        }
+        private static class ResponseData{
+            private Integer position;
+            private String message;
+            public ResponseData(){
 
-            request = new Request.Builder()
-                    .url(serverUrl + "findPosition")
-                    .method("POST", body)
-                    .build();
+            }
+            public String getMessage() {
+                return message;
+            }
+
+            public void setMessage(String message) {
+                this.message = message;
+            }
+
+            public Integer getPosition() {
+                return position;
+            }
+
+            public void setPosition(Integer position) {
+                this.position = position;
+            }
         }
 
         @Override
         public void run() {
-            while (isActive) {
-                try{
-                    Response response = client.newCall(request).execute();
-                    if (!response.isSuccessful() || response.body() == null) throw new Exception("Bad Request or body is null");
-                    String textResponse = response.body().string();
-                    handler.post(() -> {
-                        queuePositionNumber.setText(textResponse);
-                    });
-                    Thread.sleep(4000);
-                } catch (Exception e) {
-                    Log.e(TAG, "Can't get current position from server", e);
-                }
+            String textResponse;
+            try (Response response = client.newCall(request).execute()) {
+                if (!response.isSuccessful() || response.body() == null)
+                    throw new Exception("Bad Request or body is null");
+                textResponse = response.body().string();
+                ResponseData data = mapper.readValue(textResponse, ResponseData.class);
+                runOnUiThread(()->{
+                    queuePositionNumber.setText(String.format("%d", data.getPosition()));
+                });
+            } catch (IOException e) {
+                Log.e(TAG, "Can't send request to API", e);
+            } catch (Exception e) {
+                Log.e(TAG, Objects.requireNonNull(e.getMessage()));
             }
         }
     }

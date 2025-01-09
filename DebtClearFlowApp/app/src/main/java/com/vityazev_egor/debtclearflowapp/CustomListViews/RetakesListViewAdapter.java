@@ -1,4 +1,4 @@
-package com.vityazev_egor.debtclearflowapp;
+package com.vityazev_egor.debtclearflowapp.CustomListViews;
 
 import android.content.Context;
 import android.content.Intent;
@@ -11,14 +11,16 @@ import android.widget.TextView;
 import java.util.*;
 
 import com.vityazev_egor.debtclearflowapp.Models.CustomListModel;
+import com.vityazev_egor.debtclearflowapp.QueueViewActivity;
+import com.vityazev_egor.debtclearflowapp.R;
 
-public class CustomListViewAdapter extends BaseAdapter {
+public class RetakesListViewAdapter extends BaseAdapter {
 
     private final LayoutInflater inflater;
     private final List<CustomListModel> data;
     private final Context context;
 
-    public CustomListViewAdapter(Context context, CustomListModel[] models){
+    public RetakesListViewAdapter(Context context, CustomListModel[] models){
         inflater = LayoutInflater.from(context);
         this.data = new ArrayList<>(Arrays.asList(models));
         this.context = context;
@@ -28,8 +30,8 @@ public class CustomListViewAdapter extends BaseAdapter {
         data.add(model);
     }
 
-    public CustomListModel findModelById(int modelId){
-        return data.stream().filter(model -> model.getId() == modelId).findFirst().orElse(null);
+    public Optional<CustomListModel> findModelById(int modelId){
+        return data.stream().filter(model -> model.getId() == modelId).findFirst();
     }
 
     @Override
@@ -47,9 +49,13 @@ public class CustomListViewAdapter extends BaseAdapter {
         return data.get(i).getId();
     }
 
+    public List<CustomListModel> getData() {
+        return data;
+    }
+
     @Override
     public View getView(int i, View view, ViewGroup viewGroup) {
-        view = inflater.inflate(R.layout.activity_custom_list_view, null);
+        view = inflater.inflate(R.layout.activity_retakes_list_view, null);
         TextView receptionName = view.findViewById(R.id.reception_name);
         TextView receptionDate = view.findViewById(R.id.reception_date);
         TextView receptionRoom = view.findViewById(R.id.reception_room);

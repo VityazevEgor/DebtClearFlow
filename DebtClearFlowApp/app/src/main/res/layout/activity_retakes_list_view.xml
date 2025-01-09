@@ -9,7 +9,7 @@
     android:divider="?android:dividerHorizontal"
     android:showDividers="middle"
     android:padding="16dp"
-    tools:context=".CustomListView">
+    tools:context=".CustomListViews.RetakesListView">
 
     <LinearLayout
         android:layout_width="0dp"

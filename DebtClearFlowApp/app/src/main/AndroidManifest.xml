@@ -20,13 +20,13 @@
             android:name=".QueueViewActivity"
             android:exported="false" />
         <activity
-            android:name=".CustomListView"
+            android:name=".CustomListViews.RetakesListView"
             android:exported="false" />
         <activity
             android:name=".MyRetakesActivity"
             android:exported="false" />
         <activity
-            android:name=".MainActivity"
+            android:name=".AuthActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

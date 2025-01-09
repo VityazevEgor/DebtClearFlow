@@ -13,7 +13,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-public class MainActivity extends AppCompatActivity {
+public class AuthActivity extends AppCompatActivity {
 
     private final String TAG = "MainActivity";
     private Shared shared;
@@ -73,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loadSecondForm(){
-        Intent intent = new Intent(MainActivity.this, MyRetakesActivity.class);
+        Intent intent = new Intent(AuthActivity.this, MyRetakesActivity.class);
         startActivity(intent);
     }
 

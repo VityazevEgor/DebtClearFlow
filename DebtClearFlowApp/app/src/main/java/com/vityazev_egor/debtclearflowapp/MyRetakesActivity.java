@@ -2,8 +2,6 @@ package com.vityazev_egor.debtclearflowapp;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.ListView;
@@ -11,39 +9,38 @@ import android.widget.ListView;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
-import androidx.core.os.HandlerCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.vityazev_egor.debtclearflowapp.CustomListViews.RetakesListViewAdapter;
 import com.vityazev_egor.debtclearflowapp.Models.DebtRepayment;
 import com.vityazev_egor.debtclearflowapp.Models.CustomListModel;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import okhttp3.MediaType;
-import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class MyRetakesActivity extends AppCompatActivity {
 
-    private final String TAG = "SecondActivity";
-    private CustomListViewAdapter adapter;
+    private final String TAG = "MyRetakesActivity";
+    private RetakesListViewAdapter adapter;
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
     @Override
     protected void onStop() {
         scheduler.shutdown();
-        Log.w(TAG, "SecondActivity is not active");
+        Log.w(TAG, "MyRetakesActivity is not active");
         super.onStop();
     }
 
@@ -67,7 +64,7 @@ public class MyRetakesActivity extends AppCompatActivity {
     }
 
     private void setUpUI(){
-        adapter = new CustomListViewAdapter(this, new CustomListModel[]{});
+        adapter = new RetakesListViewAdapter(this, new CustomListModel[]{});
         ListView listView = findViewById(R.id.listView);
         listView.setAdapter(adapter);
 
@@ -78,7 +75,7 @@ public class MyRetakesActivity extends AppCompatActivity {
     private void logOut(){
         Shared shared = new Shared(this);
         shared.clearData();
-        Intent intent = new Intent(MyRetakesActivity.this, MainActivity.class);
+        Intent intent = new Intent(MyRetakesActivity.this, AuthActivity.class);
         startActivity(intent);
         finish();
     }
@@ -100,51 +97,49 @@ public class MyRetakesActivity extends AppCompatActivity {
         private final ObjectMapper mapper = new ObjectMapper();
 
         public ReceptionsGetter(String email, String serverUrl) {
-            Map<String, String> jsonBody = new HashMap<>();
-            jsonBody.put("email", email);
-
-            String jsonString;
-            try {
-                jsonString = mapper.writeValueAsString(jsonBody);
-            } catch (JsonProcessingException e) {
-                Log.e(TAG, "Error creating JSON", e);
-                jsonString = "{}";
-            }
-
-            MediaType JSON = MediaType.get("application/json; charset=utf-8");
-            RequestBody body = RequestBody.create(jsonString, JSON);
-
-            this.request = new Request.Builder()
-                    .url(serverUrl + "findReceptions")
-                    .post(body)
-                    .addHeader("Content-Type", "application/json")
-                    .build();
-
+            Map<String, String> jsonBody = Map.of("email", email);
+            this.request = Shared.buildJsonPostRequest(jsonBody, "findReceptions");
             mapper.registerModule(new JavaTimeModule());
         }
 
         @Override
         public void run() {
-            try {
-                Response response = client.newCall(request).execute();
-                assert response.body() != null;
-                String responseString = response.body().string();
+            String responseString;
+            try (Response response = client.newCall(request).execute()) {
+                if (!response.isSuccessful() || response.body() == null)
+                    throw new Exception("Bad Request or body is null");
+                responseString = response.body().string();
                 Log.i(TAG, responseString);
-                DebtRepayment[] receptions = mapper.readValue(responseString, DebtRepayment[].class);
-                for (DebtRepayment reception : receptions) {
-                    if (adapter.findModelById(reception.getId()) == null) {
-                        adapter.addModel(new CustomListModel(
-                                reception.getId(),
-                                reception.getName(),
-                                reception.getStarTime().toString(),
-                                reception.getCloset()
-                        ));
-                    }
-                }
+                List<DebtRepayment> receptions = Arrays.asList(mapper.readValue(responseString, DebtRepayment[].class));
+                addNewReceptions(receptions);
+                removeOldReceptions(receptions);
                 runOnUiThread(() -> adapter.notifyDataSetChanged());
             } catch (Exception e) {
                 Log.e(TAG, "I could not get receptions", e);
             }
+        }
+
+        private void addNewReceptions(List<DebtRepayment> receptions){
+            receptions.forEach(reception->{
+                if (!adapter.findModelById(reception.getId()).isPresent()) {
+                    adapter.addModel(new CustomListModel(
+                            reception.getId(),
+                            reception.getName(),
+                            reception.getStarTime().toString(),
+                            reception.getCloset()
+                    ));
+                }
+            });
+        }
+
+        private void removeOldReceptions(List<DebtRepayment> receptions){
+            List<CustomListModel> toRemove = new ArrayList<>();
+            for (CustomListModel model : adapter.getData()){
+                if (receptions.stream().noneMatch(reception-> Objects.equals(reception.getId(), model.getId()))){
+                    toRemove.add(model);
+                }
+            }
+            adapter.getData().removeAll(toRemove);
         }
     }
 }

@@ -59,7 +59,7 @@ public class AppMainController {
     }
 
     // TODO переделать методы ниже, чтобы они принимали JSON
-    @GetMapping("/findPosition")
+    @PostMapping("/findPosition")
     public ResponseEntity<Map<String, Object>> findPosition(@RequestBody FindPositionRequest findPositionRequest) {
         try {
             DebtRepayment repayment = repaymentRepo.findById(findPositionRequest.getRepaymentId())
@@ -91,7 +91,7 @@ public class AppMainController {
         }
     }
 
-    @GetMapping("/getTeacherInfo")
+    @PostMapping("/getTeacherInfo")
     public ResponseEntity<Map<String, Object>> getTeacherInfo(@RequestParam String email, @RequestParam String repaymentId) {
         try {
             DebtRepayment repayment = repaymentRepo.findById(Integer.parseInt(repaymentId))
