@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import okhttp3.MediaType;
 import okhttp3.Request;
@@ -51,21 +52,4 @@ public class Shared {
                 }).show();
     }
 
-    public static Request buildJsonPostRequest(Map<String, String> data, String apiPath){
-        ObjectMapper mapper = new ObjectMapper();
-        String jsonString;
-        try {
-            jsonString = mapper.writeValueAsString(data);
-        } catch (JsonProcessingException e) {
-            Log.e("SHARED", "Error creating JSON", e);
-            jsonString = "{}";
-        }
-        MediaType JSON = MediaType.get("application/json; charset=utf-8");
-        RequestBody body = RequestBody.create(jsonString, JSON);
-        return new Request.Builder()
-                .url(serverUrl + apiPath)
-                .post(body)
-                .addHeader("Content-Type", "application/json")
-                .build();
-    }
 }

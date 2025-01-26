@@ -72,12 +72,6 @@ public class AppMainController {
                 .map(s -> studentsInQueue.indexOf(s) + 1)
                 .orElse(-1);
 
-            if (position == -1) {
-                return ResponseEntity.ok(Map.of(
-                    "position", -1
-                ));
-            }
-
             return ResponseEntity.ok(Map.of(
                 "position", position
             ));
@@ -91,13 +85,31 @@ public class AppMainController {
         }
     }
 
-    @PostMapping("/getTeacherInfo")
-    public ResponseEntity<Map<String, Object>> getTeacherInfo(@RequestParam String email, @RequestParam String repaymentId) {
+    @PostMapping("/getQStudentInfo")
+    public ResponseEntity<?> getQStudentInfo(@RequestBody FindPositionRequest findPositionRequest) {
         try {
-            DebtRepayment repayment = repaymentRepo.findById(Integer.parseInt(repaymentId))
+            DebtRepayment repayment = repaymentRepo.findById(findPositionRequest.getRepaymentId())
+                .orElseThrow(() -> new IllegalArgumentException("Invalid repayment ID"));
+            return studentRepo.findByEmailAndDebtRepayment(findPositionRequest.getEmail(), repayment)
+                .stream()
+                .findFirst()
+                .map(student -> ResponseEntity.ok(student))
+                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body(null)
+            );
+        } catch (Exception e) {
+            logger.error("Error getting student info for email: ", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("error", "Failed to retrieve student information"));
+        }
+    }
+
+    @PostMapping("/getTeacherInfo")
+    public ResponseEntity<?> getTeacherInfo(@RequestBody FindPositionRequest findPositionRequest) {
+        try {
+            DebtRepayment repayment = repaymentRepo.findById(findPositionRequest.getRepaymentId())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid repayment ID"));
 
-            return studentRepo.findByEmailAndDebtRepayment(email, repayment)
+            return studentRepo.findByEmailAndDebtRepayment(findPositionRequest.getEmail(), repayment)
                 .stream()
                 .findFirst()
                 .map(QStudent::getTeacherLogin)
@@ -107,21 +119,18 @@ public class AppMainController {
                     .map(teacher -> {
                         Teacher secureTeacher = teacher.clone();
                         secureTeacher.setPassword(null);
-                        return ResponseEntity.ok(Map.of(
-                            "message", "Teacher found successfully",
-                            "data", secureTeacher
-                        ));
+                        return ResponseEntity.ok(secureTeacher);
                     })
                     .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(Map.of("message", "Teacher not found"))))
+                        .body(null)))
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("message", "Student not found")));
+                    .body(null));
                     
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest()
                 .body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
-            logger.error("Error getting teacher info for email: " + email, e);
+            logger.error("Error getting teacher info for email: " + findPositionRequest.getEmail(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(Map.of("error", "Failed to retrieve teacher information"));
         }

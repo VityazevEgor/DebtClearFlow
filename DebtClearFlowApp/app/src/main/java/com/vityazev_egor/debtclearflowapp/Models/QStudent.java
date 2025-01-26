@@ -1,6 +1,9 @@
 package com.vityazev_egor.debtclearflowapp.Models;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class QStudent {
+    // по id мы будем определяеть положение в очереди этого студента
     private Integer id;
 
     private String fullName;
@@ -8,10 +11,12 @@ public class QStudent {
     private String workDeskription;
 
     // id очереди в которую добавлен этот студент
-    private Integer debtRepaymentId;
+    private DebtRepayment debtRepayment;
 
-    // был ли студент уже принят преподователем
+    // была ли работа студента принята
     private Boolean isAccepted = false;
+    // была ли работа студента отклонена
+    private Boolean isRejected = false;
 
     // находится ли студент сейчас на приёме у преподователя
     private Boolean isInProcess = false;
@@ -23,66 +28,78 @@ public class QStudent {
         return fullName != null && email != null;
     }
 
-    @Override
-    public String toString(){
-        return "id: " + id + "\n" +
-                "fullName: " + fullName + "\n" +
-                "email: " + email + "\n" +
-                "workDeskription: " + workDeskription + "\n" +
-                "debtRepaymentId: " + debtRepaymentId + "\n" +
-                "isAccepted: " + isAccepted + "\n" +
-                "isInProcess: " + isInProcess + "\n" +
-                "teacherLogin: " + teacherLogin + "\n";
+    public Integer getId() {
+        return id;
     }
 
     public void setId(Integer id) {
         this.id = id;
     }
-    public Integer getId() {
-        return id;
-    }
 
-    public void setFullName(String fullName){
-        this.fullName = fullName;
-    }
-    public String getFullName(){
+    public String getFullName() {
         return fullName;
     }
-    public void setEmail(String email){
-        this.email = email;
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
     }
-    public String getEmail(){
+
+    public String getEmail() {
         return email;
     }
-    public void setWorkDeskription(String workDeskription){
-        this.workDeskription = workDeskription;
+
+    public void setEmail(String email) {
+        this.email = email;
     }
-    public String getWorkDeskription(){
+
+    public String getWorkDeskription() {
         return workDeskription;
     }
 
-    public void setDebtRepaymentId(Integer debtRepaymentId){
-        this.debtRepaymentId = debtRepaymentId;
+    public void setWorkDeskription(String workDeskription) {
+        this.workDeskription = workDeskription;
     }
-    public Integer getDebtRepaymentId(){
-        return debtRepaymentId;
+
+    public DebtRepayment getDebtRepayment() {
+        return debtRepayment;
     }
-    public void setIsAccepted(Boolean isAccepted){
-        this.isAccepted = isAccepted;
+
+    public void setDebtRepayment(DebtRepayment debtRepayment) {
+        this.debtRepayment = debtRepayment;
     }
-    public Boolean getIsAccepted(){
+
+    @JsonProperty("isAccepted")
+    public Boolean getAccepted() {
         return isAccepted;
     }
-    public void setIsInProcess(Boolean isInProcess){
-        this.isInProcess = isInProcess;
+
+    public void setAccepted(Boolean accepted) {
+        isAccepted = accepted;
     }
-    public Boolean getIsInProcess(){
+
+    @JsonProperty("isRejected")
+    public Boolean getRejected() {
+        return isRejected;
+    }
+
+    public void setRejected(Boolean rejected) {
+        isRejected = rejected;
+    }
+
+    @JsonProperty("isInProcess")
+    public Boolean getInProcess() {
         return isInProcess;
     }
-    public void setTeacherLogin(String teacherLogin){
-        this.teacherLogin = teacherLogin;
+
+    public void setInProcess(Boolean inProcess) {
+        isInProcess = inProcess;
     }
-    public String getTeacherLogin(){
+
+    public String getTeacherLogin() {
         return teacherLogin;
+    }
+
+    public void setTeacherLogin(String teacherLogin) {
+        this.teacherLogin = teacherLogin;
     }
 }

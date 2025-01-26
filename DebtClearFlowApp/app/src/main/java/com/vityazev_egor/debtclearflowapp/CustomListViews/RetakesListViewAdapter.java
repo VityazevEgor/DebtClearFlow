@@ -54,25 +54,33 @@ public class RetakesListViewAdapter extends BaseAdapter {
     }
 
     @Override
-    public View getView(int i, View view, ViewGroup viewGroup) {
-        view = inflater.inflate(R.layout.activity_retakes_list_view, null);
-        TextView receptionName = view.findViewById(R.id.reception_name);
-        TextView receptionDate = view.findViewById(R.id.reception_date);
-        TextView receptionRoom = view.findViewById(R.id.reception_room);
-        Button button = view.findViewById(R.id.go_button);
-        receptionName.setText(data.get(i).getName());
-        receptionDate.setText(data.get(i).getTime());
-        receptionRoom.setText(data.get(i).getReceptionRoom());
+    public View getView(int position, View convertView, ViewGroup parent) {
+        // View recycling
+        if (convertView == null) {
+            convertView = inflater.inflate(R.layout.activity_retakes_list_view, parent, false);
+        }
 
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(context, QueueViewActivity.class);
-                intent.putExtra("id", data.get(i).getId()); //для передачи id
-                intent.putExtra("name", data.get(i).getName());
-                context.startActivity(intent);
-            }
+        // Find views
+        TextView receptionName = convertView.findViewById(R.id.reception_name);
+        TextView receptionDate = convertView.findViewById(R.id.reception_date);
+        TextView receptionRoom = convertView.findViewById(R.id.reception_room);
+        Button button = convertView.findViewById(R.id.go_button);
+
+        // Set data
+        CustomListModel currentRetake = data.get(position);
+        receptionName.setText(currentRetake.getName());
+        receptionDate.setText(currentRetake.getTime());
+        receptionRoom.setText(currentRetake.getReceptionRoom());
+
+        // Set click listener using final position variable
+        final int finalPosition = position;
+        button.setOnClickListener(v -> {
+            Intent intent = new Intent(context, QueueViewActivity.class);
+            intent.putExtra("id", data.get(finalPosition).getId());
+            intent.putExtra("name", data.get(finalPosition).getName());
+            context.startActivity(intent);
         });
-        return view;
+
+        return convertView;
     }
 }

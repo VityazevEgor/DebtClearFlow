@@ -1,42 +1,49 @@
 package com.vityazev_egor.debtclearflowapp;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.appcompat.widget.Toolbar;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
-import androidx.core.os.HandlerCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.textfield.TextInputEditText;
+import com.vityazev_egor.debtclearflowapp.Models.QStudent;
+import com.vityazev_egor.debtclearflowapp.Models.Teacher;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import okhttp3.MediaType;
-import okhttp3.MultipartBody;
-import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class QueueViewActivity extends AppCompatActivity {
 
     private TextView queuePositionNumber;
+    private TextView queuePositionLabel;
+    private ImageView teacherPhoto;
+    private TextInputEditText teacherNameField;
+    private MaterialCardView queueCard;
+    private MaterialCardView teacherCard;
+    private MaterialCardView successCard;
+    private MaterialCardView failureCard;
 
     private final String TAG = "QueueViewActivity";
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
@@ -65,9 +72,16 @@ public class QueueViewActivity extends AppCompatActivity {
         });
 
         queuePositionNumber = findViewById(R.id.queuePositionNumber);
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        queuePositionLabel = findViewById(R.id.queuePositionLabel);
+        teacherPhoto = findViewById(R.id.teacherPhoto);
+        teacherNameField = findViewById(R.id.teacherNameField);
+        queueCard = findViewById(R.id.queueCard);
+        teacherCard = findViewById(R.id.teacherCard);
+        successCard = findViewById(R.id.successCard);
+        failureCard = findViewById(R.id.failureCard);
+        MaterialToolbar toolbar = findViewById(R.id.toolbar);
 
-        Button button = findViewById(R.id.backButton);
+        MaterialButton button = findViewById(R.id.backButton);
         button.setOnClickListener(v -> {
             Intent intent = new Intent(this, MyRetakesActivity.class);
             startActivity(intent);
@@ -78,8 +92,8 @@ public class QueueViewActivity extends AppCompatActivity {
             Integer repaymentId = bundle.getInt("id");
             String email = new Shared(this).getData("email");
             if (repaymentId == 0 || email == null) {
-                Log.e(TAG, "Can't get repayment id from bundle or email is nulls");
-                new Shared(this).showSimpleAlert("Error", "Что-то пошло не так при иницилизации формы");
+                Log.e(TAG, "Can't get repayment id from bundle or email is null");
+                new Shared(this).showSimpleAlert("Error", "Что-то пошло не так при инициализации формы");
                 return;
             }
 
@@ -94,57 +108,78 @@ public class QueueViewActivity extends AppCompatActivity {
         }
     }
 
-    // класс который получает информацию о текущем положении в очереди студента
     private class PositionUpdater implements Runnable {
-        private final OkHttpClient client = new OkHttpClient().newBuilder().build();
-        private final ObjectMapper mapper = new ObjectMapper();
-        private final Request request;
+        private final APIModule apiModule = new APIModule();
+        private final Request getPositionRequest, getQstudentRequest, getTeacherInfoRequest;
 
-        public PositionUpdater(String email, Integer repaymentId, String serverUrl) {
-            Map<String, String> jsonBody = Map.of("email", email, "repaymentId", repaymentId.toString());
-            this.request = Shared.buildJsonPostRequest(jsonBody, "findPosition");
-        }
-        private static class ResponseData{
+        private static class PositionData {
             private Integer position;
-            private String message;
-            public ResponseData(){
-
-            }
-            public String getMessage() {
-                return message;
-            }
-
-            public void setMessage(String message) {
-                this.message = message;
-            }
-
             public Integer getPosition() {
                 return position;
             }
-
             public void setPosition(Integer position) {
                 this.position = position;
             }
         }
 
+        public PositionUpdater(String email, Integer repaymentId, String serverUrl) {
+            Map<String, String> jsonBody = Map.of("email", email, "repaymentId", repaymentId.toString());
+            this.getPositionRequest = apiModule.buildJsonPostRequest(jsonBody, "findPosition");
+            this.getQstudentRequest = apiModule.buildJsonPostRequest(jsonBody, "getQStudentInfo");
+            this.getTeacherInfoRequest = apiModule.buildJsonPostRequest(jsonBody, "getTeacherInfo");
+        }
+
         @Override
         public void run() {
-            String textResponse;
-            try (Response response = client.newCall(request).execute()) {
-                if (!response.isSuccessful() || response.body() == null)
-                    throw new Exception("Bad Request or body is null");
-                textResponse = response.body().string();
-                ResponseData data = mapper.readValue(textResponse, ResponseData.class);
-                runOnUiThread(()->{
-                    queuePositionNumber.setText(String.format("%d", data.getPosition()));
-                });
-            } catch (IOException e) {
-                Log.e(TAG, "Can't send request to API", e);
-            } catch (Exception e) {
-                Log.e(TAG, Objects.requireNonNull(e.getMessage()));
+            try {
+                PositionData posData = apiModule.sendRequest(getPositionRequest, PositionData.class).orElseThrow(() -> new Exception("Can't get information about current pos"));
+                if (posData.getPosition() > 0){
+                    runOnUiThread(() -> {
+                        queuePositionNumber.setText(String.format("%d", posData.getPosition()));
+                        queueCard.setVisibility(View.VISIBLE);
+                        teacherCard.setVisibility(View.GONE);
+                        queuePositionLabel.setText("Ваша позиция в очереди");
+                    });
+                    return;
+                }
+                QStudent qStudent = apiModule.sendRequest(getQstudentRequest, QStudent.class).orElseThrow(() -> new Exception("Can't get qStudent object"));
+                Teacher teacher = apiModule.sendRequest(getTeacherInfoRequest, Teacher.class).orElseThrow(() -> new Exception("Can't get information about teacher"));
+                Bitmap teacherImage = apiModule.getImage(teacher.getImageName()).orElseThrow(() -> new Exception("Can't get teacher avatar"));
+
+                if (qStudent.getInProcess()){
+                    runOnUiThread(() -> {
+                        hideMainCards();
+                        teacherCard.setVisibility(View.VISIBLE);
+                        teacherNameField.setText(teacher.getFullname());
+                        teacherPhoto.setImageBitmap(teacherImage);
+                    });
+                    return;
+                }
+                if (qStudent.getAccepted()){
+                    runOnUiThread(() -> {
+                        hideMainCards();
+                        successCard.setVisibility(View.VISIBLE);
+                    });
+                    return;
+                }
+                if (qStudent.getRejected()){
+                    runOnUiThread(() -> {
+                        hideMainCards();
+                        failureCard.setVisibility(View.VISIBLE);
+                    });
+                }
+
+            }
+            catch (Exception e){
+                Log.e(TAG, "Can't update information about position: " + e.getMessage());
             }
         }
+
+        private void hideMainCards(){
+            queueCard.setVisibility(View.GONE);
+            teacherCard.setVisibility(View.GONE);
+            successCard.setVisibility(View.GONE);
+            failureCard.setVisibility(View.GONE);
+        }
     }
-
-
 }

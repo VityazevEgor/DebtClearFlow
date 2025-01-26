@@ -92,31 +92,22 @@ public class MyRetakesActivity extends AppCompatActivity {
     }
 
     public class ReceptionsGetter implements Runnable {
-        private final OkHttpClient client = new OkHttpClient().newBuilder().build();
         private final Request request;
-        private final ObjectMapper mapper = new ObjectMapper();
+        private final APIModule api = new APIModule();
 
         public ReceptionsGetter(String email, String serverUrl) {
             Map<String, String> jsonBody = Map.of("email", email);
-            this.request = Shared.buildJsonPostRequest(jsonBody, "findReceptions");
-            mapper.registerModule(new JavaTimeModule());
+            this.request = api.buildJsonPostRequest(jsonBody, "findReceptions");
         }
 
         @Override
         public void run() {
-            String responseString;
-            try (Response response = client.newCall(request).execute()) {
-                if (!response.isSuccessful() || response.body() == null)
-                    throw new Exception("Bad Request or body is null");
-                responseString = response.body().string();
-                Log.i(TAG, responseString);
-                List<DebtRepayment> receptions = Arrays.asList(mapper.readValue(responseString, DebtRepayment[].class));
+            api.sendRequest(request, DebtRepayment[].class).ifPresent(receptionsArray ->{
+                List<DebtRepayment> receptions = Arrays.asList(receptionsArray);
                 addNewReceptions(receptions);
                 removeOldReceptions(receptions);
                 runOnUiThread(() -> adapter.notifyDataSetChanged());
-            } catch (Exception e) {
-                Log.e(TAG, "I could not get receptions", e);
-            }
+            });
         }
 
         private void addNewReceptions(List<DebtRepayment> receptions){
