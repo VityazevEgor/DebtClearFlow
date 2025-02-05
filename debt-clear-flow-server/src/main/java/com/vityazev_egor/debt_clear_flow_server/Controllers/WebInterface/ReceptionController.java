@@ -145,7 +145,6 @@ public class ReceptionController {
         repayment.setStatus(RepaymentStatus.CLOSED);
         debtRepaymentRepo.save(repayment);
         return new ModelAndView("redirect:/panel/myRepayments");
-        
     }
 
 }

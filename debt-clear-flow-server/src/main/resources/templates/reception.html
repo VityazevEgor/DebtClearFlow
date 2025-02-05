@@ -3,8 +3,34 @@
 <head>
     <title>DebtClearFlow - Приём студентов</title>
     <!-- Подключение Bootstrap CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+    <!-- Подключение Font Awesome для иконок -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="stylesheet" th:href="@{~/custom.css}">
+    <style>
+        .card {
+            box-shadow: 0 0.5rem 1rem rgba(0,0,0,.15);
+            border: none;
+            border-radius: 0.5rem;
+        }
+        .card-header {
+            background-color: #f8f9fa;
+            border-bottom: none;
+            font-weight: bold;
+        }
+        .btn-action {
+            border-radius: 20px;
+            padding: 0.5rem 1.5rem;
+        }
+        .time-left {
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+        .queue-size {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -14,85 +40,97 @@
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="timeExpiredModalLabel">Время закончилось</h5>
+                        <h5 class="modal-title" id="timeExpiredModalLabel">
+                            <i class="fas fa-clock text-warning mr-2"></i>Время закончилось
+                        </h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
                     </div>
                     <div class="modal-body">
                         Время отработки закончилось. Вы можете продлить время или завершить отработку.
                     </div>
                     <div class="modal-footer">
-                        <a th:href="@{'~/panel/reception/' + ${repayment.id} + '/extendTime'}" class="btn btn-primary">Продлить время</a>
-                        <a th:href="@{'~/panel/reception/' + ${repayment.id} + '/endReception'}" class="btn btn-danger">Завершить отработку</a>
+                        <a th:href="@{'~/panel/reception/' + ${repayment.id} + '/extendTime'}" class="btn btn-primary">
+                            <i class="fas fa-clock mr-2"></i>Продлить время
+                        </a>
+                        <a th:href="@{'~/panel/reception/' + ${repayment.id} + '/endReception'}" class="btn btn-danger">
+                            <i class="fas fa-times-circle mr-2"></i>Завершить отработку
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
         
-        <div class="row">
+        <div class="row mt-4">
             <!-- Основной блок -->
-            <div class="col-md-8">
-                <div class="card mb-3">
-                    <div class="card-header">
-                        Приём студентов на отработку - <span th:text="${repayment.name}"></span>
+            <div class="col-lg-8 mb-4">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <i class="fas fa-users mr-2"></i>Приём студентов на отработку - <span th:text="${repayment.name}"></span>
                     </div>
                     <div class="card-body">
                         <form th:if="${currentStudent != null}">
                             <div class="form-group">
-                                <label for="file">ФИО студента</label>
-                                <input type="text" disabled class="form-control" name="fullName" th:value="${currentStudent.fullName}">
+                                <label for="fullName"><i class="fas fa-user mr-2"></i>ФИО студента</label>
+                                <input type="text" disabled class="form-control" id="fullName" name="fullName" th:value="${currentStudent.fullName}">
                             </div>
                             <div class="form-group">
-                                <label for="workDescriptionColumn">Описание задолжности</label>
-                                <input type="text" class="form-control" name="workDeskription" th:value="${currentStudent.workDeskription}">
+                                <label for="workDeskription"><i class="fas fa-tasks mr-2"></i>Описание задолжности</label>
+                                <input type="text" class="form-control" id="workDeskription" name="workDeskription" th:value="${currentStudent.workDeskription}">
                             </div>
-                            <div class="d-flex justify-content-between mt-4">
-                                <a class="btn btn-success" th:href="@{'~/panel/reception/' + ${repayment.id} + '/accept'}">
-                                    Принять работу
+                            <div class="d-flex flex-wrap justify-content-between mt-4">
+                                <a class="btn btn-success btn-action mb-2" th:href="@{'~/panel/reception/' + ${repayment.id} + '/accept'}">
+                                    <i class="fas fa-check mr-2"></i>Принять работу
                                 </a>
-                                <a class="btn btn-danger" th:href="@{'~/panel/reception/' + ${repayment.id} + '/reject'}">
-                                    Работа не принята
+                                <a class="btn btn-danger btn-action mb-2" th:href="@{'~/panel/reception/' + ${repayment.id} + '/reject'}">
+                                    <i class="fas fa-times mr-2"></i>Работа не принята
                                 </a>
-                                <a class="btn btn-warning" th:href="@{'~/panel/reception/' + ${repayment.id} + '/sendToEnd'}">
-                                    Отправить в конец очереди
+                                <a class="btn btn-warning btn-action mb-2" th:href="@{'~/panel/reception/' + ${repayment.id} + '/sendToEnd'}">
+                                    <i class="fas fa-undo mr-2"></i>Отправить в конец очереди
                                 </a>
                             </div>
                         </form>
 
                         <div class="alert alert-danger mt-4" role="alert" th:if="${currentStudent == null}" th:text="${errorMessage}">
-                            Тут будет сообщени с ошибкой
+                            Тут будет сообщение с ошибкой
                         </div>
                         <a th:if="${currentStudent == null and isClosed == null}" class="btn btn-lg btn-primary mt-3" th:href="@{'~/panel/reception/' + ${repayment.id} + '/next'}" role="button">
-                            Начать приём
+                            <i class="fas fa-play mr-2"></i>Начать приём
                         </a>
                     </div>
                 </div>
             </div>
 
             <!-- Боковая панель -->
-            <div class="col-md-4">
+            <div class="col-lg-4">
                 <div class="card">
-                    <div class="card-header">
-                        Информация об отработке
+                    <div class="card-header bg-info text-white">
+                        <i class="fas fa-info-circle mr-2"></i>Информация об отработке
                     </div>
                     <div class="card-body">
-                        <p><strong>Время до конца отработки:</strong></p>
-                        <p class="text-primary h4">
+                        <p><strong><i class="fas fa-hourglass-half mr-2"></i>Время до конца отработки:</strong></p>
+                        <p class="text-primary time-left">
                             <span id="time-left-value" th:text="${timeLeft}"></span>
-                            <span>минут</span>
+                            <span>мин</span>
                         </p>
 
                         <hr>
 
-                        <p><strong>Студентов в очереди:</strong></p>
-                        <p class="text-success h4" th:text="${queueSize}"></p>
+                        <p><strong><i class="fas fa-users mr-2"></i>Студентов в очереди:</strong></p>
+                        <p class="text-success queue-size" th:text="${queueSize}"></p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Подключение jQuery -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <!-- Подключение Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
     <!-- Подключение Bootstrap JS -->
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.min.js"></script>
     <script>
         // Функция для обновления времени
         function updateTimeLeft() {
@@ -126,7 +164,5 @@
         // Запускаем уменьшение каждую минуту
         setInterval(updateTimeLeft, 60000);
     </script>
-    
-  
 </body>
 </html>

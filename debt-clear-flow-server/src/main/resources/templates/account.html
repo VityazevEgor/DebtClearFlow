@@ -3,79 +3,114 @@
 <head>
     <title>DebtClearFlow - Настройки профиля</title>
     <!-- Подключение Bootstrap CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+    <!-- Подключение Font Awesome для иконок -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="stylesheet" th:href="@{~/custom.css}">
+    <style>
+        .card {
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+            margin-bottom: 1.5rem;
+        }
+        .profile-image {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 50%;
+            margin-bottom: 1rem;
+        }
+        .form-group label {
+            font-weight: 600;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <div th:replace="~{layout :: header}"></div>
 
-        <div class="row">
+        <div class="row mt-4">
             <!-- Блок информации о пользователе -->
-            <div class="col-md-6" th:if="${currentUser != null}">
+            <div class="col-md-4 mb-4" th:if="${currentUser != null}">
                 <div class="card">
-                    <div class="card-header">
-                        Мои данные
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-user mr-2"></i>Мои данные</h5>
                     </div>
-                    <div class="card-body">
-                        <p>Имя: <span id="fullname" th:text="${currentUser.fullname}"></span></p>
-                        <p>Логин: <span id="login" th:text="${currentUser.login}"></span></p>
-                        <img th:src="@{'~/images/' + ${currentUser.imageName}}" alt="Аватар пользователя" style="width: 100%;">
+                    <div class="card-body text-center">
+                        <img th:src="@{'~/images/' + ${currentUser.imageName}}" alt="Аватар пользователя" class="profile-image">
+                        <h5 id="fullname" th:text="${currentUser.fullname}" class="mb-2"></h5>
+                        <p class="text-muted mb-0"><i class="fas fa-user-tag mr-2"></i><span id="login" th:text="${currentUser.login}"></span></p>
                     </div>
                 </div>
             </div>
 
             <!-- Блоки справа -->
-            <div class="col-md-6">
+            <div class="col-md-8">
                 <div class="alert alert-success" role="alert" th:if="${message != null}" th:text="${message}">
                     This is a success alert—check it out!
                 </div>
     
-                <div class="alert alert-danger" role="alert" th:if = "${errorMessage != null}" th:text="${errorMessage}">
+                <div class="alert alert-danger" role="alert" th:if="${errorMessage != null}" th:text="${errorMessage}">
                     This is a danger alert—check it out!
                 </div>
+
                 <!-- Блок смены пароля -->
                 <div class="card">
-                    <div class="card-header">
-                        Смена пароля
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-key mr-2"></i>Смена пароля</h5>
                     </div>
                     <div class="card-body">
                         <form id="passwordChangeForm" th:action="@{~/panel/account/changePassword}" method="post" enctype="multipart/form-data">
                             <div class="form-group">
                                 <label for="currentPassword">Текущий пароль</label>
-                                <input type="password" class="form-control" id="currentPassword" name="currentPassword">
+                                <input type="password" class="form-control" id="currentPassword" name="currentPassword" placeholder="Введите текущий пароль">
                             </div>
                             <div class="form-group">
                                 <label for="newPassword">Новый пароль</label>
-                                <input type="password" class="form-control" id="newPassword" name="newPassword">
+                                <input type="password" class="form-control" id="newPassword" name="newPassword" placeholder="Введите новый пароль">
                             </div>
-                            <button type="submit" class="btn btn-primary">Сменить пароль</button>
+                            <button type="submit" class="btn btn-primary btn-block">
+                                <i class="fas fa-save mr-2"></i>Сменить пароль
+                            </button>
                         </form>
                     </div>
                 </div>
 
                 <!-- Блок смены фотографии профиля -->
-                <div class="card mt-3">
-                    <div class="card-header">
-                        Смена фотографии профиля
+                <div class="card mt-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-camera mr-2"></i>Смена фотографии профиля</h5>
                     </div>
                     <div class="card-body">
                         <form id="profileImageChangeForm" method="post" th:action="@{~/panel/account/setImage}" enctype="multipart/form-data">
                             <div class="form-group">
                                 <label for="newProfileImage">Выберите новую фотографию</label>
-                                <input type="file" class="form-control-file" id="newProfileImage" name="newProfileImage">
+                                <div class="custom-file">
+                                    <input type="file" class="custom-file-input" id="newProfileImage" name="newProfileImage">
+                                    <label class="custom-file-label" for="newProfileImage">Выберите файл</label>
+                                </div>
                             </div>
-                            <button type="submit" class="btn btn-primary">Установить новую фотографию</button>
+                            <button type="submit" class="btn btn-primary btn-block">
+                                <i class="fas fa-upload mr-2"></i>Установить новую фотографию
+                            </button>
                         </form>
                     </div>
                 </div>
             </div>
         </div>
-
     </div>
 
+    <!-- Подключение jQuery -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <!-- Подключение Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
     <!-- Подключение Bootstrap JS -->
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.min.js"></script>
+    <script>
+        // Отображение имени выбранного файла
+        $('.custom-file-input').on('change', function() {
+            let fileName = $(this).val().split('\\').pop();
+            $(this).next('.custom-file-label').addClass("selected").html(fileName);
+        });
+    </script>
 </body>
 </html>

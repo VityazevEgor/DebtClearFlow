@@ -3,49 +3,111 @@
 <head>
     <title>DebtClearFlow - Мои отработки</title>
     <!-- Подключение Bootstrap CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+    <!-- Подключение DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.24/css/dataTables.bootstrap4.min.css">
+    <!-- Подключение Font Awesome для иконок -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="stylesheet" th:href="@{~/custom.css}">
+    <style>
+        .table-hover tbody tr:hover {
+            background-color: rgba(0, 123, 255, 0.1);
+        }
+        .badge-custom {
+            font-size: 0.9em;
+        }
+        .card {
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <div th:replace="~{layout :: header}"></div>
 
-        <!-- Таблица с данными обо всех отработках -->
-        <div class="table-responsive">
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th scope="col">Название</th>
-                    <th scope="col">Кабинет</th>
-                    <th scope="col">Время начала</th>
-                    <th scope="col">Время окончания</th>
-                    <th scope="col">Логины преподавателей</th>
-                    <th scope="col">Состояние</th>
-                    <th scope="col">Действия</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="debtRepayment : ${debtRepayments}">
-                    <td th:text="${debtRepayment.name}"></td>
-                    <td th:text="${debtRepayment.closet}"></td>
-                    <td th:text="${#temporals.format(debtRepayment.starTime, 'dd.MM.yyyy HH:mm')}"></td>
-                    <td th:text="${#temporals.format(debtRepayment.endTime, 'dd.MM.yyyy HH:mm')}"></td>
-                    <td th:text="${debtRepayment.teachersLogins}"></td>
-                    <td th:text="${debtRepayment.status}"></td>
-                    <td>
-                        <a th:href="@{'~/panel/reception/' + ${debtRepayment.id}}" class="btn btn-outline-success">Начать приём</a>
-                        <a th:href="@{'~/panel/view/' + ${debtRepayment.id}}" class="btn btn-primary">Списки</a>
-                        <a th:href="@{'~/panel/delete/' + ${debtRepayment.id}}" class="btn btn-danger">Удалить</a>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+        <div class="card mt-4">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Мои отработки</h4>
+            </div>
+            <div class="card-body">
+                <!-- Таблица с данными обо всех отработках -->
+                <div class="table-responsive">
+                    <table id="debtRepaymentTable" class="table table-striped table-hover">
+                        <thead class="thead-light">
+                            <tr>
+                                <th scope="col">Название</th>
+                                <th scope="col">Кабинет</th>
+                                <th scope="col">Время начала</th>
+                                <th scope="col">Время окончания</th>
+                                <th scope="col">Логины преподавателей</th>
+                                <th scope="col">Состояние</th>
+                                <th scope="col">Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="debtRepayment : ${debtRepayments}">
+                                <td th:text="${debtRepayment.name}"></td>
+                                <td><span class="badge badge-info badge-custom" th:text="${debtRepayment.closet}"></span></td>
+                                <td th:text="${#temporals.format(debtRepayment.starTime, 'dd.MM.yyyy HH:mm')}"></td>
+                                <td th:text="${#temporals.format(debtRepayment.endTime, 'dd.MM.yyyy HH:mm')}"></td>
+                                <td th:text="${debtRepayment.teachersLogins}"></td>
+                                <td>
+                                    <!-- TODO тут не работает определение поля по какой-то причине, хотя оно должно уметь конвертироваться в стркоу -->
+                                    <span th:class="${'badge badge-custom ' + 
+                                        (debtRepayment.status == 'OPEN' ? 'badge-success' : 
+                                        (debtRepayment.status == 'CLOSED' ? 'badge-secondary' : 'badge-warning'))}"
+                                        th:text="${debtRepayment.status}">
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="dropdown">
+                                        <button class="btn btn-outline-primary btn-sm dropdown-toggle" type="button" th:id="'dropdownMenuButton-' + ${debtRepayment.id}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            <i class="fas fa-cog"></i> Действия
+                                        </button>
+                                        <div class="dropdown-menu" th:aria-labelledby="'dropdownMenuButton-' + ${debtRepayment.id}">
+                                            <a class="dropdown-item" th:href="@{'~/panel/reception/' + ${debtRepayment.id}}">
+                                                <i class="fas fa-play text-success"></i> Начать приём
+                                            </a>
+                                            <a class="dropdown-item" th:href="@{'~/panel/view/' + ${debtRepayment.id}}">
+                                                <i class="fas fa-list-ul text-primary"></i> Списки
+                                            </a>
+                                            <div class="dropdown-divider"></div>
+                                            <a class="dropdown-item text-danger" th:href="@{'~/panel/delete/' + ${debtRepayment.id}}">
+                                                <i class="fas fa-trash-alt"></i> Удалить
+                                            </a>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
-
     </div>
 
+    <!-- Подключение jQuery -->
+    <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+    <!-- Подключение Popper.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
     <!-- Подключение Bootstrap JS -->
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.min.js"></script>
+    <!-- Подключение DataTables JS -->
+    <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.24/js/dataTables.bootstrap4.min.js"></script>
+    
+    <script>
+    $(document).ready(function() {
+        $('#debtRepaymentTable').DataTable({
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Russian.json"
+            },
+            "columnDefs": [
+                { "orderable": false, "targets": 6 }
+            ]
+        });
+    });
+    </script>
 </body>
 </html>
+

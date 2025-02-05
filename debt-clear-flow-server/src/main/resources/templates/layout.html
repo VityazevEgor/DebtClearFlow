@@ -4,52 +4,83 @@
 <head>
     <title>Layout</title>
     <!-- Подключение Bootstrap CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+    <!-- Подключение Font Awesome для иконок -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="stylesheet" th:href="@{~/custom.css}">
 </head>
 
 <body>
     <div class="container">
-        <nav class="navbar navbar-expand-lg navbar-light bg-light rounded" th:fragment="header" style="margin-bottom: 10px;">
-            <a class="navbar-brand" th:href="@{~/}">DebtClearFlow</a>
-            <button class="navbar-toggler collapsed" type="button" data-toggle="collapse" data-target="#navbarsExample09" aria-controls="navbarsExample09" aria-expanded="false" aria-label="Toggle navigation">
+        <nav class="navbar navbar-expand-lg navbar-light bg-white rounded" th:fragment="header">
+            <a class="navbar-brand" th:href="@{~/}">
+                <i class="fas fa-graduation-cap mr-2"></i>DebtClearFlow
+            </a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarMain" aria-controls="navbarMain" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
 
-            <div class="navbar-collapse collapse" id="navbarsExample09">
+            <div class="collapse navbar-collapse" id="navbarMain">
                 <ul class="navbar-nav mr-auto">
                     <li class="nav-item">
-                        <a class="nav-link" th:href="@{~/panel/myRepayments}">Мои отработки</span></a>
+                        <a class="nav-link" th:href="@{~/panel/myRepayments}">
+                            <i class="fas fa-list-alt mr-1"></i>Мои отработки
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" th:href="@{~/panel/createRepayment}">Создать отработку</a>
+                        <a class="nav-link" th:href="@{~/panel/createRepayment}">
+                            <i class="fas fa-plus-circle mr-1"></i>Создать отработку
+                        </a>
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="http://example.com" id="dropdown09" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Настройки</a>
-                        <div class="dropdown-menu" aria-labelledby="dropdown09">
-                            <a class="dropdown-item" th:href="@{~/panel/account/}">Мой аккаунт</a>
-                            <a class="dropdown-item" href="#">Настройка импорта</a>
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fas fa-cog mr-1"></i>Настройки
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <a class="dropdown-item" th:href="@{~/panel/account/}">
+                                <i class="fas fa-user mr-2"></i>Мой аккаунт
+                            </a>
+                            <a class="dropdown-item" href="#">
+                                <i class="fas fa-file-import mr-2"></i>Настройка импорта
+                            </a>
                         </div>
                     </li>
                 </ul>
-                <a class="btn-primary btn" th:if="${session == null or session.login == null}" th:href="@{~/login}">Войти</a>
-                <a class="btn-secondary btn" th:if="${session != null and session.login != null}" th:href="@{~/logout}">Выйти</a>
-                <!-- <p th:if="${session != null and session.login != null}" th:text="${session.login}"></p> -->
+                <div class="navbar-nav">
+                    <a class="btn btn-primary btn-auth" th:if="${session == null or session.login == null}" th:href="@{~/login}">
+                        <i class="fas fa-sign-in-alt mr-1"></i>Войти
+                    </a>
+                    <a class="btn btn-outline-secondary btn-auth" th:if="${session != null and session.login != null}" th:href="@{~/logout}">
+                        <i class="fas fa-sign-out-alt mr-1"></i>Выйти
+                    </a>
+                </div>
             </div>
         </nav>
 
-        <div th:fragment="errorAlert" class="alert alert-danger" role="alert" th:if = "${errorMessage != null}" th:text="${errorMessage}">
-            This is a danger alert—check it out!
-        </div>
-        <div th:fragment="successAlert"  class="alert alert-success" role="alert" th:if="${message != null}" th:text="${message}">
-            This is a success alert—check it out!
+        <div th:fragment="errorAlert" class="alert alert-danger alert-dismissible fade show" role="alert" th:if="${errorMessage != null}">
+            <i class="fas fa-exclamation-circle mr-2"></i>
+            <span th:text="${errorMessage}"></span>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
         </div>
 
-
+        <div th:fragment="successAlert" class="alert alert-success alert-dismissible fade show" role="alert" th:if="${message != null}">
+            <i class="fas fa-check-circle mr-2"></i>
+            <span th:text="${message}"></span>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
     </div>
+
+    <!-- Подключение jQuery -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <!-- Подключение Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
     <!-- Подключение Bootstrap JS -->
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.min.js"></script>
 </body>
 
 </html>
+

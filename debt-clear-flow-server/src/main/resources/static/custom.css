@@ -1,3 +1,29 @@
 .container{
     padding-top: 10px;
 }
+
+/* для красивого меню */
+.navbar {
+    box-shadow: 0 2px 4px rgba(0,0,0,.1);
+}
+.navbar-brand {
+    font-weight: bold;
+    color: #007bff !important;
+}
+.nav-item {
+    margin-right: 10px;
+}
+.nav-link {
+    color: #495057 !important;
+    font-weight: 500;
+}
+.nav-link:hover {
+    color: #007bff !important;
+}
+.dropdown-item:active {
+    background-color: #007bff;
+}
+.btn-auth {
+    border-radius: 20px;
+    padding: 8px 20px;
+}

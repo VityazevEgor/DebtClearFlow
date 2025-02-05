@@ -3,23 +3,29 @@
 <head>
     <title>DebtClearFlow</title>
     <!-- Подключение Bootstrap CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <!-- Подключение Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+    <!-- Подключение Font Awesome для иконок -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="stylesheet" th:href="@{~/custom.css}">
 </head>
 <body>
     <div class="container">
         <div th:replace="~{layout :: header}"></div>
 
-        <div class="jumbotron">
+        <div class="jumbotron mt-4">
             <h1>DebtClearFlow</h1>
             <p class="lead">Система автоматизации организации очередей на отработки учебных задолжностей и экзаменов </p>
             <a class="btn btn-lg btn-primary" th:href="@{~/login}" role="button" th:if="${session == null or session.login == null}">Перейти к авторизации для преподавателей »</a>
             <a class="btn btn-lg btn-primary" th:href="@{~/panel/myRepayments}" role="button" th:if="${session != null and session.login != null}">Перейти к панели для преподавателей »</a>
         </div>
     </div>
-
+    <!-- TODO добавить тут что-то типо лендинга с описанием преимуществ, а также подключить все иконки и прочее -->
+    <!-- Подключение jQuery -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <!-- Подключение Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
     <!-- Подключение Bootstrap JS -->
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.min.js"></script>
 </body>
 </html>

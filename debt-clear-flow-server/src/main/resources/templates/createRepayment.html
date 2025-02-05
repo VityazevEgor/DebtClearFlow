@@ -3,59 +3,97 @@
 <head>
     <title>DebtClearFlow - Создать отработку</title>
     <!-- Подключение Bootstrap CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-    <link rel="stylesheet" th:href="@{~/custom.css}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+    <!-- Подключение Font Awesome для иконок -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <!-- Подключение Select2 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+    <!-- Подключение Flatpickr CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" th:href="@{~/custom.css}">
+    <style>
+        .card {
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+        .select2-container--bootstrap-5 .select2-selection--multiple .select2-selection__choice {
+            background-color: #007bff;
+            border: none;
+            color: #fff;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <div th:replace="~{layout :: header}"></div>
 
-         <!-- Форма для заполнения данных модели DebtRepayment -->
-         <form method="post" th:action="@{createRepayment}", enctype="application/x-www-form-urlencoded" th:object="${repayment}">
-            <div th:replace="~{layout :: errorAlert}"></div>
-            <div th:replace="~{layout :: successAlert}"></div>
-            <div class="form-group">
-                <label for="name">Название</label>
-                <input type="text" class="form-control" th:field="*{name}" placeholder="Введите название отработки">
+        <div class="card mt-4">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Создать отработку</h4>
             </div>
-            <div class="form-group">
-                <label for="closet">Кабинет</label>
-                <input type="text" class="form-control" th:field="*{closet}" placeholder="Введите номер кабинета">
+            <div class="card-body">
+                <!-- Форма для заполнения данных модели DebtRepayment -->
+                <form method="post" th:action="@{createRepayment}" enctype="application/x-www-form-urlencoded" th:object="${repayment}">
+                    <div th:replace="~{layout :: errorAlert}"></div>
+                    <div th:replace="~{layout :: successAlert}"></div>
+                    <div class="form-group">
+                        <label for="name"><i class="fas fa-tag mr-2"></i>Название</label>
+                        <input type="text" class="form-control" th:field="*{name}" placeholder="Введите название отработки">
+                    </div>
+                    <div class="form-group">
+                        <label for="closet"><i class="fas fa-door-open mr-2"></i>Кабинет</label>
+                        <input type="text" class="form-control" th:field="*{closet}" placeholder="Введите номер кабинета">
+                    </div>
+                    <div class="form-group">
+                        <label for="starTime"><i class="fas fa-clock mr-2"></i>Время начала</label>
+                        <input type="text" class="form-control flatpickr" th:field="*{starTime}">
+                    </div>
+                    <div class="form-group">
+                        <label for="endTime"><i class="fas fa-clock mr-2"></i>Время окончания</label>
+                        <input type="text" class="form-control flatpickr" th:field="*{endTime}">
+                    </div>
+                    <div class="form-group">
+                        <label for="teachersLogins"><i class="fas fa-chalkboard-teacher mr-2"></i>Преподаватели</label>
+                        <select class="form-control teachers-select" name="teachersLogins" multiple="multiple">
+                            <option th:each="teacher : ${teachers}" 
+                                    th:value="${teacher.login}" 
+                                    th:text="${teacher.fullname}">
+                            </option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">
+                        <i class="fas fa-plus-circle mr-2"></i>Создать отработку
+                    </button>
+                </form>
             </div>
-            <div class="form-group">
-                <label for="starTime">Время начала</label>
-                <input type="datetime-local" class="form-control" th:field="*{starTime}" >
-            </div>
-            <div class="form-group">
-                <label for="endTime">Время окончания</label>
-                <input type="datetime-local" class="form-control" th:field="*{endTime}">
-            </div>
-            <div class="form-group">
-                <label for="teachersLogins">Преподаватели</label>
-                <select class="form-control teachers-select" name="teachersLogins" multiple="multiple">
-                    <option th:each="teacher : ${teachers}" 
-                            th:value="${teacher.login}" 
-                            th:text="${teacher.fullname}">
-                    </option>
-                </select>
-            </div>
-            <button type="submit" class="btn btn-primary">Создать отработку</button>
-        </form>
-
+        </div>
     </div>
 
+    <!-- Подключение jQuery -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <!-- Подключение Popper.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
     <!-- Подключение Bootstrap JS -->
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.min.js"></script>
+    <!-- Подключение Select2 JS -->
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <!-- Подключение Flatpickr JS -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/ru.js"></script>
     <script>
         $(document).ready(function() {
             $('.teachers-select').select2({
+                theme: 'bootstrap-5',
                 placeholder: 'Выберите преподавателей',
                 allowClear: true,
                 width: '100%'
+            });
+
+            flatpickr(".flatpickr", {
+                enableTime: true,
+                dateFormat: "Y-m-d\\TH:i",
+                time_24hr: true,
+                locale: "ru"
             });
         });
     </script>
